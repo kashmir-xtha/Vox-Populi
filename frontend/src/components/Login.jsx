@@ -2,18 +2,26 @@ import { useState } from "react"
 
 function Login() {
     const [showPassword, setShowPassword] = useState(false)
+    const [message, setMessage] = useState("")
     const [role, setRole] = useState("")
     const [username, setUsername] = useState("")
     const [password, setPassword] = useState("")
 
     const handleSubmit = (e) => {
         e.preventDefault()
-        const loginData = {
-            role,
-            username,
-            password,
+        if (role === "") {
+            setMessage("Please select a role!!")
+            return
         }
-        console.log(loginData); // send this to backend later
+        else {
+            setMessage("") //clearing the message
+            const loginData = {
+                role,
+                username,
+                password,
+            }
+            console.log(loginData); // send this to backend later
+        }
     }
 
     return (
@@ -115,8 +123,9 @@ function Login() {
                                 </div>
                             </label>
                         </div>
+                        <div className="h-6 text-center -mt-2 mb-2 text-red-500">{message}</div>
                         <button
-                            className="flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-4 bg-[#137fec] text-white text-base font-bold leading-normal tracking-[0.015em] hover:bg-[#137fec]/90 transition-all shadow-md active:scale-[0.98] mt-2"
+                            className="flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-4 bg-[#137fec] text-white text-base font-bold leading-normal tracking-[0.015em] hover:bg-[#137fec]/90 transition-all shadow-md active:scale-[0.98]"
                             type="submit">
                             <span className="truncate">Login</span>
                         </button>
