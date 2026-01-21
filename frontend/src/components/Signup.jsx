@@ -1,19 +1,31 @@
 import { useState } from "react"
+import axios from "axios"
 
 function Signup() {
     const [showPassword, setShowPassword] = useState(false)
     const [role, setRole] = useState("admin")
     const [username, setUsername] = useState("")
     const [password, setPassword] = useState("")
+    const [message, setMessage] = useState("")
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault()
         const loginData = {
             role,
             username,
             password,
         }
-        console.log(loginData); // send this to backend later
+        try {
+            setMessage("")
+            const response = await axios.post(
+                "http://localhost:5000/api/signup",
+                loginData
+            )
+            setMessage(response.data.error)
+            console.log(response.data)
+        } catch (error) {
+            console.log(error)
+        }
     }
 
     return (
@@ -73,6 +85,7 @@ function Signup() {
                                 >visibility</span>
                             </div>
                         </div>
+                        <div className="h-6 text-center -mt-2 mb-2 text-red-500">{message}</div>
                         <button
                             className="w-full h-12 bg-[#137fec] text-white font-bold rounded-xl hover:bg-[#137fec]/90 transition-all shadow-lg shadow-[#137fec]/25 flex items-center justify-center gap-2"
                             type="submit">

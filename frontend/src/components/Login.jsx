@@ -1,4 +1,5 @@
 import { useState } from "react"
+import axios from 'axios'
 
 function Login() {
     const [showPassword, setShowPassword] = useState(false)
@@ -7,7 +8,7 @@ function Login() {
     const [username, setUsername] = useState("")
     const [password, setPassword] = useState("")
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault()
         if (role === "") {
             setMessage("Please select a role!!")
@@ -20,7 +21,16 @@ function Login() {
                 username,
                 password,
             }
-            console.log(loginData); // send this to backend later
+            try {
+                const response = await axios.post(
+                    "http://localhost:5000/api/login",
+                    loginData
+                )
+                setMessage(response.data.error)
+                console.log(response.data)
+            } catch (error) {
+                console.log(error)
+            }
         }
     }
 
