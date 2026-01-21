@@ -51,51 +51,9 @@ def init_database():
         )
         """)
         
-        # Create elections table
-        cursor.execute("""
-        CREATE TABLE IF NOT EXISTS elections (
-            id SERIAL PRIMARY KEY,
-            title VARCHAR(200) NOT NULL,
-            description TEXT,
-            start_date TIMESTAMP NOT NULL,
-            end_date TIMESTAMP NOT NULL,
-            status VARCHAR(20) DEFAULT 'upcoming' CHECK (status IN ('upcoming', 'active', 'completed')),
-            created_by INTEGER REFERENCES users(id),
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
-        """)
-        
-        # Create candidates table
-        cursor.execute("""
-        CREATE TABLE IF NOT EXISTS candidates (
-            id SERIAL PRIMARY KEY,
-            election_id INTEGER REFERENCES elections(id) ON DELETE CASCADE,
-            user_id INTEGER REFERENCES users(id),
-            manifesto TEXT,
-            votes INTEGER DEFAULT 0,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            UNIQUE(election_id, user_id)
-        )
-        """)
-        
-        # Create votes table
-        cursor.execute("""
-        CREATE TABLE IF NOT EXISTS votes (
-            id SERIAL PRIMARY KEY,
-            election_id INTEGER REFERENCES elections(id) ON DELETE CASCADE,
-            voter_id INTEGER REFERENCES users(id),
-            candidate_id INTEGER REFERENCES candidates(id),
-            voted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            UNIQUE(election_id, voter_id)
-        )
-        """)
-        
         # Create indexes for better performance
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_users_username ON users(username)")
-        cursor.execute("CREATE INDEX IF NOT EXISTS idx_elections_status ON elections(status)")
-        cursor.execute("CREATE INDEX IF NOT EXISTS idx_candidates_election ON candidates(election_id)")
-        cursor.execute("CREATE INDEX IF NOT EXISTS idx_votes_election_voter ON votes(election_id, voter_id)")
-        
+     
         # Create default admin user if not exists
         cursor.execute("SELECT id FROM users WHERE username = 'admin'")
         if not cursor.fetchone():
