@@ -23,15 +23,13 @@ def signup():
         )
         
         if user:
-            token = User.generate_token(user['id'], user['role'])
             return jsonify({
                 'message': 'User created successfully',
                 'user': {
                     'id': user['id'],
                     'role': user['role'],
                     'username': user['username']
-                },
-                'token': token
+                }
             }), 201
         else:
             return jsonify({'error': 'Failed to create user'}), 500
@@ -55,11 +53,7 @@ def login():
     if not user:
         return jsonify({'error': 'Invalid credentials or role mismatch'}), 200
     
-    # Generate token
-    token = User.generate_token(user['id'], user['role'])
-    
     return jsonify({
         'message': 'Login successful',
-        'user': user,
-        'token': token
+        'user': user
     }), 200

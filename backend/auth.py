@@ -1,6 +1,5 @@
 from functools import wraps
-from flask import request, jsonify
-from models import User
+from flask import jsonify
 
 def role_required(allowed_roles):
     def decorator(f):

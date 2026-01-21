@@ -1,8 +1,6 @@
 from database import db
 import bcrypt
-import jwt
-from datetime import datetime, timedelta
-from config import config
+from datetime import datetime
 
 class User:
     @staticmethod
