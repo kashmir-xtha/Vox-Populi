@@ -5,7 +5,7 @@ from routes import api
 import logging
 
 def create_app():
-    app = Flask(__name__)
+    app = Flask(__name__, static_folder=None)
     app.config['SECRET_KEY'] = config.SECRET_KEY
     
     # Enable CORS for all routes
@@ -14,6 +14,22 @@ def create_app():
     # Register blueprints
     app.register_blueprint(api, url_prefix='/api')
     
+    @app.route('/')
+    def home():
+        """Serve the homepage"""
+        return jsonify({
+            'message': 'Vox Populi API is running!',
+            'endpoints': {
+                'health_check': '/health',
+                'login': '/api/login',
+                'signup': '/api/signup',
+                'routes_list': '/routes'
+            },
+            'test_credentials': {
+                'admin': 'username: admin, password: admin123, role: admin'
+            }
+        }), 200
+
     # Error handlers
     @app.errorhandler(404)
     def not_found(error):
@@ -28,6 +44,19 @@ def create_app():
     def health_check():
         return jsonify({'status': 'healthy'}), 200
     
+    @app.route('/routes', methods=['GET'])
+    def list_routes():
+        """List all available routes for debugging"""
+        routes = []
+        for rule in app.url_map.iter_rules():
+            routes.append({
+                'endpoint': rule.endpoint,
+                'methods': list(rule.methods),
+                'path': str(rule)
+            })
+        return jsonify({'routes': routes}), 200
+
+
     return app
 
 if __name__ == '__main__':
