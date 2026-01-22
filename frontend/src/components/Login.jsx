@@ -7,7 +7,7 @@ function Login() {
     const [role, setRole] = useState("")
     const [username, setUsername] = useState("")
     const [password, setPassword] = useState("")
-
+    
     const handleSubmit = async (e) => {
         e.preventDefault()
         if (role === "") {
@@ -27,7 +27,15 @@ function Login() {
                     loginData
                 )
                 setMessage(response.data.error)
-                console.log(response.data)
+                if (response.data.error) {
+                    return
+                }
+                else {
+                    const token = btoa(JSON.stringify(response.data.user))
+                    localStorage.setItem("token", token)
+                    const user = JSON.parse(atob(token))
+                    console.log(user)
+                }
             } catch (error) {
                 console.log(error)
             }
