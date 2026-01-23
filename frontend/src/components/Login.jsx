@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { useNavigate } from "react-router-dom"
 import axios from 'axios'
 
 function Login() {
@@ -7,7 +8,8 @@ function Login() {
     const [role, setRole] = useState("")
     const [username, setUsername] = useState("")
     const [password, setPassword] = useState("")
-    
+    const navigate = useNavigate()
+
     const handleSubmit = async (e) => {
         e.preventDefault()
         if (role === "") {
@@ -34,7 +36,15 @@ function Login() {
                     const token = btoa(JSON.stringify(response.data.user))
                     localStorage.setItem("token", token)
                     const user = JSON.parse(atob(token))
-                    console.log(user)
+                    if (user.role === 'admin') {
+                        navigate('/adminDashboard')
+                    }
+                    if (user.role === 'candidate'){
+                        navigate('/candidateApplicationForm')
+                    }
+                    if (user.role === 'voter'){
+                        navigate('/voterBallot')
+                    }
                 }
             } catch (error) {
                 console.log(error)

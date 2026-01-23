@@ -1,9 +1,14 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
-import Navbar from "./components/navbar"
-import Home from "./components/home"
+import Navbar from "./components/Navbar"
+import Home from "./components/Home"
 import Footer from "./components/Footer"
 import Login from "./components/Login"
 import Signup from "./components/Signup"
+import AdminDashboard from "./components/AdminDashboard"
+import AdminCreatePositions from "./components/AdminCreatePositions"
+import AdminApproveCandidates from "./components/AdminApproveCandidates"
+import CandidateApplicationForm from "./components/CandidateApplicationForm"
+import VoterBallot from "./components/VoterBallot"
 
 function App() {
   return (
@@ -15,6 +20,11 @@ function App() {
           <Route path="/" Component={Home} />
           <Route path="/login" Component={Login} />
           <Route path="/signup" Component={Signup} />
+          <Route path="/adminDashboard" Component={AdminDashboard} />
+          <Route path="/adminCreatePositions" Component={AdminCreatePositions} />
+          <Route path="/adminApproveCandidates" Component={AdminApproveCandidates} />
+          <Route path="/candidateApplicationForm" Component={CandidateApplicationForm} />
+          <Route path="/voterBallot" Component={VoterBallot} />
         </Routes>
         <Footer />
       </Router>

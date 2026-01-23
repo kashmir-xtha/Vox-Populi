@@ -53,19 +53,7 @@ def init_database():
         
         # Create indexes for better performance
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_users_username ON users(username)")
-     
-        # Create default admin user if not exists
-        cursor.execute("SELECT id FROM users WHERE username = 'admin'")
-        if not cursor.fetchone():
-            hashed_password = bcrypt.hashpw("admin123".encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
-            cursor.execute(
-                "INSERT INTO users (role, username, password) VALUES (%s, %s, %s)",
-                ('admin', 'admin', hashed_password)
-            )
-            print("Default admin user created: username='admin', password='admin123'")
-        
-        print("Database tables created successfully!")
-        
+           
         cursor.close()
         
     except Exception as e:
