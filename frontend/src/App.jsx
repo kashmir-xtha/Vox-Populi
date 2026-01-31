@@ -9,6 +9,7 @@ import AdminCreatePositions from "./components/AdminCreatePositions"
 import AdminApproveCandidates from "./components/AdminApproveCandidates"
 import CandidateApplicationForm from "./components/CandidateApplicationForm"
 import VoterBallot from "./components/VoterBallot"
+import AdminResults from "./components/AdminResults"
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
           <Route path="/adminDashboard" Component={AdminDashboard} />
           <Route path="/adminCreatePositions" Component={AdminCreatePositions} />
           <Route path="/adminApproveCandidates" Component={AdminApproveCandidates} />
+          <Route path="/adminResults" Component={AdminResults} />
           <Route path="/candidateApplicationForm" Component={CandidateApplicationForm} />
           <Route path="/voterBallot" Component={VoterBallot} />
         </Routes>

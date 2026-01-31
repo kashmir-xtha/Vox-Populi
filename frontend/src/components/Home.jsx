@@ -1,6 +1,24 @@
+import { useNavigate } from 'react-router-dom'
+import { useEffect } from 'react'
 import image from '../assets/homepage_image.png'
 
 function Home() {
+    const navigate = useNavigate()
+
+    useEffect(() => {
+        const token = localStorage.getItem("token")
+        const role = token ? JSON.parse(atob(token)).role : ""
+
+        if (role === 'admin') {
+            navigate('/adminDashboard')
+        }
+        if (role === 'candidate') {
+            navigate('/candidateApplicationForm')
+        }
+        if (role === 'voter') {
+            navigate('/voterBallot')
+        }
+    }, [navigate])
     return (
         <>
             <section

@@ -1,6 +1,18 @@
+import { useNavigate } from "react-router-dom"
+import { useEffect } from "react"
 import image from "../assets/homepage_image.png"
 
 export default function VoterBallot() {
+    const navigate = useNavigate()
+
+    useEffect(() => {
+        const token = localStorage.getItem("token")
+        const role = token ? JSON.parse(atob(token)).role : ""
+
+        if (role !== 'voter') {
+            navigate('/')
+        }
+    }, [navigate])
     return (<>
         <main className="flex-1 w-full max-w-200 mx-auto py-10 px-4 md:px-0">
             <div className="mb-10 text-center">

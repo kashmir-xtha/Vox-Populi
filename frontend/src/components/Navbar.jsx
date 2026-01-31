@@ -20,12 +20,15 @@ function Navbar() {
                     </div>
                     <NavLink to='/' className="text-xl font-black leading-tight tracking-tight">VoxPopuli</NavLink>
                 </div>
-                <div className="font-bold">{username}</div>
                 {token ? /*If no token; no login */
-                    <button onClick={handleLogout} className="flex items-center gap-2 px-4 py-2 rounded-lg text-red-600 hover:bg-red-950/30 cursor-pointer font-semibold transition-colors">
-                        <span className="material-symbols-outlined">logout</span>
-                        <span>Log Out</span>
-                    </button> :
+                    <div className="flex gap-3">
+                        <div className="flex items-center font-bold">{username}</div>
+                        <button onClick={handleLogout} className="flex items-center gap-2 px-4 py-2 rounded-lg text-red-600 hover:bg-red-950/30 cursor-pointer font-semibold transition-colors">
+                            <span className="material-symbols-outlined">logout</span>
+                            <span>Log Out</span>
+                        </button>
+                    </div>
+                    :
                     <div className="flex items-center gap-10">
                         <NavLink
                             to='/login'

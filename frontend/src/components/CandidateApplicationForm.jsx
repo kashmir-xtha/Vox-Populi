@@ -1,4 +1,18 @@
+import { useEffect } from "react"
+import { useNavigate } from "react-router-dom"
+
+
 export default function CandidateApplicationForm() {
+    const navigate = useNavigate()
+
+    useEffect(() => {
+        const token = localStorage.getItem("token")
+        const role = token ? JSON.parse(atob(token)).role : ""
+
+        if (role !== 'candidate') {
+            navigate('/')
+        }
+    }, [navigate])
     return (<>
         <main class="flex-1 flex justify-center py-10 px-4">
             <div class="W-[640px] flex flex-col gap-6">
@@ -26,6 +40,26 @@ export default function CandidateApplicationForm() {
                         </div>
                         <div class="flex flex-col gap-2">
                             <label class="text-[#111418] text-base font-medium leading-normal">
+                                Upload Candidate Photo
+                            </label>
+                            <div class="relative group">
+                                <label
+                                    class="flex flex-col items-center justify-center w-full h-52 border-2 border-dashed border-[#dbe0e6] rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition-all">
+                                    <div class="flex flex-col items-center justify-center">
+                                        <span
+                                            class="material-symbols-outlined text-[#617589] text-3xl mb-2">add_a_photo</span>
+                                        <p class="text-sm text-[#617589] font-medium">Click to upload or
+                                            drag and drop</p>
+                                        <p class="text-xs text-[#617589] mt-1">PNG, JPG or GIF (max. 5MB)
+                                        </p>
+                                    </div>
+                                    <input accept="image/*" class="hidden" type="file" />
+                                </label>
+                            </div>
+                            <p class="text-xs text-gray-500 font-medium">Please upload a professional headshot for the ballot.</p>
+                        </div>
+                        <div class="flex flex-col gap-2">
+                            <label class="text-[#111418] text-base font-medium leading-normal">
                                 Position Selection
                             </label>
                             <div class="relative">
@@ -46,7 +80,7 @@ export default function CandidateApplicationForm() {
                             </div>
                             <textarea
                                 class="form-textarea flex w-full rounded-lg text-[#111418] focus:ring-2 focus:ring-[#137fec]/20 border border-[#dbe0e6] bg-white focus:border-[#137fec] min-h-30 placeholder:text-[#617589] p-4 text-base font-normal leading-relaxed resize-none transition-all"
-                                maxlength="300" placeholder="Briefly state your vision and key objectives..."></textarea>
+                                maxlength="200" placeholder="Briefly state your vision and key objectives..."></textarea>
                             <p class="text-xs text-gray-500">This statement will be visible to all voters
                                 on the ballot paper.</p>
                         </div>

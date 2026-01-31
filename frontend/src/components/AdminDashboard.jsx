@@ -1,6 +1,17 @@
-import { NavLink } from "react-router-dom"
+import { NavLink, useNavigate } from "react-router-dom"
+import { useEffect } from "react"
 
 function AdminDashboard() {
+    const navigate = useNavigate()
+
+    useEffect(() => {
+        const token = localStorage.getItem("token")
+        const role = token ? JSON.parse(atob(token)).role : ""
+
+        if (role !== 'admin') {
+            navigate('/')
+        }
+    }, [navigate])
     return (
         <>
             <div className="flex h-screen overflow-hidden">
@@ -26,6 +37,12 @@ function AdminDashboard() {
                                     className="flex items-center gap-3 px-3 py-2 rounded-lg text-[#111418]">
                                     <span className="material-symbols-outlined text-[24px]">group</span>
                                     <p className="text-sm font-medium">Candidates</p>
+                                </NavLink>
+                                <NavLink
+                                    to='/adminResults'
+                                    className="flex items-center gap-3 px-3 py-2 rounded-lg text-[#111418]">
+                                    <span className="material-symbols-outlined text-[24px]">analytics</span>
+                                    <p className="text-sm font-medium">Results</p>
                                 </NavLink>
                             </nav>
                         </div>
@@ -98,8 +115,8 @@ function AdminDashboard() {
                                 <div className="w-1/4 px-6 py-3 text-xs font-bold uppercase tracking-wider text-[#617589]">
                                     Timestamp</div>
                             </div>
-                            {/* Iterate votes log from here using map function */}
                             <div className="h-[60vh] overflow-scroll ">
+                                {/* Iterate votes log from here using map function */}
                                 <div className="flex items-center justify-between">
                                     <div className="w-1/4 px-6 py-4 whitespace-nowrap text-sm font-medium text-[#111418]">
                                         test</div>
