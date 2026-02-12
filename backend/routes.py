@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from models import User
+from models import User, Position
 
 api = Blueprint('api', __name__)
 
@@ -36,6 +36,7 @@ def signup():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+
 @api.route('/login', methods=['POST'])
 def login():
     data = request.get_json()
@@ -57,3 +58,43 @@ def login():
         'message': 'Login successful',
         'user': user
     }), 200
+
+
+@api.route('/positions', methods=['POST'])
+def create_position():
+    data = request.get_json()
+
+    if not data or not data.get('title'):
+        return jsonify({'error': 'Missing required fields'}), 400
+
+    title = data['title'].strip()
+
+    if not title:
+        return jsonify({'error': 'Position title cannot be empty'}), 400
+
+    existing = Position.get_position_by_title(title)
+    if existing:
+        return jsonify({'error': 'Position title already exists'}), 409
+
+    position = Position.create_position(title)
+    return jsonify({
+        'message': 'Position created successfully',
+        'position': position
+    }), 201
+
+@api.route('/positions', methods=['GET'])
+def get_positions():
+    try:
+        positions = Position.get_all_positions()
+        newPos = []
+        for pos in positions:
+            newPos.append(pos[0])
+
+        if positions is None:
+            positions = []
+        return jsonify({
+            'message': 'Positions retrieved successfully',
+            'positions': newPos
+        }), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500

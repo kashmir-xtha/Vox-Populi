@@ -51,3 +51,24 @@ class User:
             'role': user['role'],
             'username': user['username']
         }
+
+class Position:
+    @staticmethod
+    def create_position(title):
+        query = """
+        INSERT INTO positions (title)
+        VALUES (%s)
+        RETURNING pos_id, title
+        """
+
+        return db.execute(query, (title,), fetchone=True)
+
+    @staticmethod
+    def get_position_by_title(title):
+        query = "SELECT pos_id, title FROM positions WHERE title = %s"
+        return db.execute(query, (title,), fetchone=True)
+    
+    @staticmethod
+    def get_all_positions():
+        query = "SELECT title FROM positions ORDER BY pos_id"
+        return db.execute(query, (), fetchall=True)

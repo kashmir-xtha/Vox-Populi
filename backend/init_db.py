@@ -53,7 +53,37 @@ def init_database():
         
         # Create indexes for better performance
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_users_username ON users(username)")
-           
+        
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS positions (
+                pos_id SERIAL PRIMARY KEY,
+                title VARCHAR(100) UNIQUE NOT NULL
+            );
+        """)
+
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS votes (
+            vote_id SERIAL PRIMARY KEY,
+            voter_id INTEGER NOT NULL,
+            candidate_id INTEGER NOT NULL,
+            pos_id INTEGER NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+            FOREIGN KEY (voter_id)
+                REFERENCES users(id)
+                ON DELETE CASCADE,
+
+            FOREIGN KEY (candidate_id)
+                REFERENCES users(id)
+                ON DELETE CASCADE,
+
+            FOREIGN KEY (pos_id)
+                REFERENCES positions(pos_id)
+                ON DELETE CASCADE,
+
+            UNIQUE (voter_id, pos_id)
+            );
+        """)
         cursor.close()
         
     except Exception as e:

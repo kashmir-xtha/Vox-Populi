@@ -1,14 +1,28 @@
 import { NavLink, useNavigate } from "react-router-dom"
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
+import axios from "axios"
 
 export default function AdminCreatePositions() {
     const navigate = useNavigate()
+    const [title, setTitle] = useState('')
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault()
-        // sending data to positions table here **************
+        const position = {
+            title
+        }
+        try {
+            const response = await axios.post(
+                "http://localhost:5000/api/positions",
+                position
+            )
+            console.log(response)
+        } catch (error) {
+            console.log(error)
+        }
+        setTitle("")
     }
-    
+
     useEffect(() => {
         const token = localStorage.getItem("token")
         const role = token ? JSON.parse(atob(token)).role : ""
@@ -69,8 +83,7 @@ export default function AdminCreatePositions() {
                                 <form onSubmit={handleSubmit} className="flex flex-col gap-8">
                                     <div className="flex flex-col gap-1">
                                         <h4 className="text-lg font-bold text-[#111418] ">Position Details</h4>
-                                        <p className="text-sm text-[#617589]">Enter the title and selection rules for this
-                                            voting category.</p>
+                                        <p className="text-sm text-[#617589]">Enter the title and selection rules for this voting category.</p>
                                     </div>
                                     <div className="space-y-6">
                                         <div className="flex flex-col gap-2">
@@ -79,10 +92,11 @@ export default function AdminCreatePositions() {
                                                 Position Title
                                             </label>
                                             <input
+                                                value={title}
+                                                onChange={(e) => setTitle(e.target.value)}
                                                 className="form-input block w-full rounded-lg border-[#dbe0e6]  bg-white text-[#111418] h-12 px-4 text-base focus:border-[#137fec] focus:ring-1 focus:ring-[#137fec] placeholder:text-[#617589]"
-                                                placeholder="e.g. Student Body President" required="" type="text" />
-                                            <p className="text-[#617589] text-xs">This title will be displayed as a heading on
-                                                the voting page.</p>
+                                                placeholder="e.g. President" required="" type="text" />
+                                            <p className="text-[#617589] text-xs">This title will be displayed as a heading on the voting page.</p>
                                         </div>
                                     </div>
                                     <div

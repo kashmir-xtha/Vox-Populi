@@ -1,3 +1,4 @@
+import axios from "axios"
 import { useState, useEffect, useRef } from "react"
 import { useNavigate } from "react-router-dom"
 
@@ -5,27 +6,9 @@ import { useNavigate } from "react-router-dom"
 export default function CandidateApplicationForm() {
     const [selectedFile, setSelectedFile] = useState(null)
     const [preview, setPreview] = useState(null)
+    const [positions, setPositions] = useState([])
     const fileInputRef = useRef(null)
     const navigate = useNavigate()
-
-    const validateFile = (file) => {
-        const maxSize = 5 * 1024 * 1024; // 5MB
-        const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/gif']
-
-        if (!file) {
-            return { valid: false, error: 'No file selected' }
-        }
-
-        if (file.size > maxSize) {
-            return { valid: false, error: 'File size must be less than 5MB' }
-        }
-
-        if (!allowedTypes.includes(file.type)) {
-            return { valid: false, error: 'Only PNG, JPG, and GIF files are allowed' };
-        }
-
-        return { valid: true }
-    };
 
     // Handle file selection
     const handleFileChange = (e) => {
@@ -54,7 +37,6 @@ export default function CandidateApplicationForm() {
         reader.readAsDataURL(file)
     }
 
-
     const resetUpload = () => {
         setSelectedFile(null)
         setPreview(null)
@@ -64,6 +46,12 @@ export default function CandidateApplicationForm() {
     }
 
     useEffect(() => {
+        const fetchPositions = async () => {
+            const response = await axios.get("http://localhost:5000/api/positions")
+            setPositions(response.data.positions)
+        }
+        fetchPositions()
+
         const token = localStorage.getItem("token")
         const role = token ? JSON.parse(atob(token)).role : ""
 
@@ -153,7 +141,11 @@ export default function CandidateApplicationForm() {
                                     <option disabled value="">
                                         Select the position you're running for
                                     </option>
-                                    <option value="test">test</option>
+                                    {positions.map((position, index) => (
+                                        <option key={index} value={position}>
+                                            {position}
+                                        </option>
+                                    ))}
                                 </select>
                             </div>
                         </div>
