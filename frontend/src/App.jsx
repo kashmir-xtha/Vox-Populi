@@ -10,6 +10,7 @@ import AdminApproveCandidates from "./components/AdminApproveCandidates"
 import CandidateApplicationForm from "./components/CandidateApplicationForm"
 import VoterBallot from "./components/VoterBallot"
 import AdminResults from "./components/AdminResults"
+import LiveResults from "./components/LiveResutls"
 
 function App() {
   return (
@@ -27,6 +28,7 @@ function App() {
           <Route path="/adminResults" Component={AdminResults} />
           <Route path="/candidateApplicationForm" Component={CandidateApplicationForm} />
           <Route path="/voterBallot" Component={VoterBallot} />
+          <Route path="/liveResults" Component={LiveResults} />
         </Routes>
         <Footer />
       </Router>

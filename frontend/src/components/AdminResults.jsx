@@ -1,5 +1,6 @@
-import { NavLink, useNavigate} from "react-router-dom"
+import { NavLink, useNavigate } from "react-router-dom"
 import { useEffect } from "react"
+import LiveResults from "./LiveResutls"
 
 export default function AdminResults() {
     const navigate = useNavigate()
@@ -48,6 +49,7 @@ export default function AdminResults() {
                         </div>
                     </div>
                 </aside>
+                <LiveResults/>
             </div>
         </>
     )
