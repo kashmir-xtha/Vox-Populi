@@ -7,6 +7,11 @@ export default function CandidateApplicationForm() {
     const [selectedFile, setSelectedFile] = useState(null)
     const [preview, setPreview] = useState(null)
     const [positions, setPositions] = useState([])
+    const [fullName, setFullName] = useState("")
+    const [positionId, setPositionId] = useState("")
+    const [statement, setStatement] = useState("")
+    const [message, setMessage] = useState("")
+    const [loading, setLoading] = useState(false)
     const fileInputRef = useRef(null)
     const navigate = useNavigate()
 
@@ -20,14 +25,17 @@ export default function CandidateApplicationForm() {
         const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/gif']
 
         if (file.size > maxSize) {
-            console.log("File size must be less than 5MB")
+            setMessage("File size must be less than 5MB")
+            return
         }
 
         if (!allowedTypes.includes(file.type)) {
-            console.log("Only PNG, JPG, and GIF files are allowed")
+            setMessage("Only PNG, JPG, and GIF files are allowed")
+            return
         }
 
         setSelectedFile(file)
+        setMessage("")
 
         // Create preview
         const reader = new FileReader()
@@ -45,10 +53,93 @@ export default function CandidateApplicationForm() {
         }
     }
 
+    const handleSubmit = async (e) => {
+        e.preventDefault()
+        setMessage("")
+        setLoading(true)
+
+        // Validation
+        if (!fullName.trim()) {
+            setMessage("Full name is required")
+            setLoading(false)
+            return
+        }
+
+        if (!selectedFile) {
+            setMessage("Please upload a photo")
+            setLoading(false)
+            return
+        }
+
+        if (!positionId) {
+            setMessage("Please select a position")
+            setLoading(false)
+            return
+        }
+
+        if (!statement.trim()) {
+            setMessage("Please enter a candidate statement")
+            setLoading(false)
+            return
+        }
+
+        // Get user from token
+        const token = localStorage.getItem("token")
+        const user = token ? JSON.parse(atob(token)) : null
+
+        if (!user || user.role !== "candidate") {
+            setMessage("Candidate access required")
+            setLoading(false)
+            return
+        }
+
+        try {
+            // Read file as base64
+            const reader = new FileReader()
+            reader.onload = async () => {
+                try {
+                    const response = await axios.post(
+                        "http://localhost:5000/api/candidates",
+                        {
+                            user_id: user.id,
+                            full_name: fullName.trim(),
+                            pos_id: parseInt(positionId),
+                            photo: reader.result,
+                            statement: statement.trim()
+                        }
+                    )
+
+                    if (response.data.error) {
+                        setMessage(response.data.error)
+                    } else {
+                        setMessage("✓ Application submitted successfully!")
+                        setFullName("")
+                        setStatement("")
+                        setPositionId("")
+                        resetUpload()
+                    }
+                } catch (error) {
+                    setMessage(error.response?.data?.error || "Server error")
+                }
+                setLoading(false)
+            }
+            reader.readAsDataURL(selectedFile)
+        } catch (error) {
+            setMessage("Server is offline")
+            setLoading(false)
+        }
+    }
+
     useEffect(() => {
         const fetchPositions = async () => {
-            const response = await axios.get("http://localhost:5000/api/positions")
-            setPositions(response.data.positions)
+            try {
+                const response = await axios.get("http://localhost:5000/api/positions")
+                if (response.data.positions) {
+                    setPositions(response.data.positions)
+                }
+            } catch (error) {
+                console.log("Failed to fetch positions")
+            }
         }
         fetchPositions()
 
@@ -73,14 +164,16 @@ export default function CandidateApplicationForm() {
                 </div>
                 <div
                     className="bg-white rounded-xl shadow-sm border border-[#dbe0e6]  overflow-hidden">
-                    <form className="p-6 md:p-8 flex flex-col gap-6">
+                    <form className="p-6 md:p-8 flex flex-col gap-6" onSubmit={handleSubmit}>
                         <div className="flex flex-col gap-2">
                             <label className="text-[#111418] text-base font-medium leading-normal">
                                 Full Name
                             </label>
                             <input
+                                value={fullName}
+                                onChange={(e) => setFullName(e.target.value)}
                                 className="form-input flex w-full rounded-lg text-[#111418] focus:ring-2 focus:ring-[#137fec]/20 border border-[#dbe0e6] bg-white  focus:border-[#137fec] h-14 placeholder:text-[#617589] px-4 text-base font-normal transition-all"
-                                placeholder="Enter your full legal name" required="" type="text" />
+                                placeholder="Enter your full legal name" required type="text" />
                             <p className="text-xs text-gray-500">As it appears on your government-issued ID.
                             </p>
                         </div>
@@ -118,6 +211,7 @@ export default function CandidateApplicationForm() {
                                                 className="w-full h-full object-cover rounded-lg border-2 border-[#dbe0e6]"
                                             />
                                             <button
+                                                type="button"
                                                 onClick={resetUpload}
                                                 className="w-6 h-6 flex items-center justify-center absolute -top-2 -right-2 bg-gray-500 text-white rounded-full cursor-pointer"
                                             >
@@ -135,14 +229,16 @@ export default function CandidateApplicationForm() {
                             </label>
                             <div className="relative">
                                 <select
-                                    defaultValue=""
+                                    value={positionId}
+                                    onChange={(e) => setPositionId(e.target.value)}
                                     className="flex w-full rounded-lg text-[#111418] focus:ring-2 focus:ring-[#137fec]/20 border border-[#dbe0e6] bg-white focus:border-[#137fec] h-14 px-4 text-base font-normal transition-all"
+                                    required
                                 >
                                     <option disabled value="">
                                         Select the position you're running for
                                     </option>
                                     {positions.map((position, index) => (
-                                        <option key={index} value={position}>
+                                        <option key={index} value={index}>
                                             {position}
                                         </option>
                                     ))}
@@ -154,21 +250,28 @@ export default function CandidateApplicationForm() {
                                 <label className="text-[#111418] text-base font-medium leading-normal">
                                     Candidate Statement
                                 </label>
-                                <span className="text-xs font-medium text-[#137fec] bg-[#137fec]/10 px-2 py-1 rounded">Limit: 3
-                                    Lines</span>
+                                <span className="text-xs font-medium text-[#137fec] bg-[#137fec]/10 px-2 py-1 rounded">{statement.length}/200</span>
                             </div>
                             <textarea
+                                value={statement}
+                                onChange={(e) => setStatement(e.target.value)}
                                 className="form-textarea flex w-full rounded-lg text-[#111418] focus:ring-2 focus:ring-[#137fec]/20 border border-[#dbe0e6] bg-white focus:border-[#137fec] min-h-30 placeholder:text-[#617589] p-4 text-base font-normal leading-relaxed resize-none transition-all"
-                                maxLength="200" placeholder="Briefly state your vision and key objectives..."></textarea>
+                                maxLength="200" placeholder="Briefly state your vision and key objectives..." required></textarea>
                             <p className="text-xs text-gray-500">This statement will be visible to all voters
                                 on the ballot paper.</p>
                         </div>
+                        {message && (
+                            <div className={`text-sm px-4 py-3 rounded ${message.includes('✓') || message.includes('successfully') ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                                {message}
+                            </div>
+                        )}
                         <div className="pt-4">
                             <button
-                                className="cursor-pointer w-full flex items-center justify-center gap-2 rounded-lg bg-[#137fec] text-white h-14 text-base font-bold hover:bg-blue-600 transition-colors shadow-lg shadow-[#137fec]/20"
+                                disabled={loading}
+                                className="cursor-pointer w-full flex items-center justify-center gap-2 rounded-lg bg-[#137fec] text-white h-14 text-base font-bold hover:bg-blue-600 transition-colors shadow-lg shadow-[#137fec]/20 disabled:opacity-50 disabled:cursor-not-allowed"
                                 type="submit">
                                 <span className="material-symbols-outlined">how_to_reg</span>
-                                Submit Application
+                                {loading ? "Submitting..." : "Submit Application"}
                             </button>
                         </div>
                     </form>

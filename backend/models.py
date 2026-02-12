@@ -52,6 +52,7 @@ class User:
             'username': user['username']
         }
 
+
 class Position:
     @staticmethod
     def create_position(title):
@@ -71,4 +72,40 @@ class Position:
     @staticmethod
     def get_all_positions():
         query = "SELECT title FROM positions ORDER BY pos_id"
+        return db.execute(query, (), fetchall=True)
+    
+    @staticmethod
+    def get_position_by_id(pos_id):
+        query = "SELECT pos_id, title FROM positions WHERE pos_id = %s"
+        return db.execute(query, (pos_id,), fetchone=True)
+
+
+class Candidate:
+    @staticmethod
+    def create_application(user_id, full_name, photo, pos_id, statement):
+        query = """
+        INSERT INTO candidates (user_id, full_name, photo, pos_id, statement, status)
+        VALUES (%s, %s, %s, %s, %s, 'pending')
+        RETURNING candidate_id, user_id, full_name, pos_id, statement, status, created_at
+        """
+        
+        return db.execute(query, (user_id, full_name, photo, pos_id, statement), fetchone=True)
+    
+    @staticmethod
+    def get_candidate_by_user_id(user_id):
+        query = """
+        SELECT candidate_id, user_id, full_name, pos_id, statement, status, created_at 
+        FROM candidates WHERE user_id = %s
+        """
+        return db.execute(query, (user_id,), fetchone=True)
+
+    @staticmethod
+    def get_all_candidates():
+        query = """
+        SELECT c.full_name, p.title, c.status 
+        FROM candidates c
+        JOIN positions p ON c.pos_id = p.pos_id
+        """
+        test = db.execute(query, (), fetchall=True)
+        print(test)
         return db.execute(query, (), fetchall=True)

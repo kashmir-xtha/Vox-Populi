@@ -1,11 +1,25 @@
 import { NavLink, useNavigate } from "react-router-dom"
 import test from "../assets/homepage_image.png"
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
+import axios from "axios"
 
 export default function AdminApproveCandidates() {
+    const [data, setData] = useState([])
     const navigate = useNavigate()
 
     useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const response = await axios.get("http://localhost:5000/api/candidates")
+                if (response.data.candidates) {
+                    console.log(response.data.candidates)
+                    setData(response.data.candidates)
+                }
+            } catch (error) {
+                console.log(error)
+            }
+        }
+        fetchData()
         const token = localStorage.getItem("token")
         const role = token ? JSON.parse(atob(token)).role : ""
         

@@ -1,5 +1,6 @@
 from flask import Blueprint, request, jsonify
-from models import User, Position
+from models import User, Position, Candidate
+import base64
 
 api = Blueprint('api', __name__)
 
@@ -35,7 +36,6 @@ def signup():
             return jsonify({'error': 'Failed to create user'}), 500
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-
 
 @api.route('/login', methods=['POST'])
 def login():
@@ -82,10 +82,12 @@ def create_position():
         'position': position
     }), 201
 
+
 @api.route('/positions', methods=['GET'])
 def get_positions():
     try:
         positions = Position.get_all_positions()
+
         newPos = []
         for pos in positions:
             newPos.append(pos[0])
@@ -95,6 +97,75 @@ def get_positions():
         return jsonify({
             'message': 'Positions retrieved successfully',
             'positions': newPos
+        }), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@api.route('/candidates', methods=['POST'])
+def submit_application():
+    try:
+        data = request.get_json()
+        
+        if not data or not data.get('user_id') or not data.get('full_name') or not data.get('pos_id') or not data.get('photo'):
+            return jsonify({'error': 'Missing required fields'}), 400
+        
+        user_id = data['user_id']
+        full_name = data['full_name'].strip()
+        pos_id = data['pos_id']
+        photo = data['photo']  # base64 encoded image
+        statement = data.get('statement', '').strip()
+        
+        if not full_name:
+            return jsonify({'error': 'Full name cannot be empty'}), 400
+        
+        # Check if user already applied
+        existing = Candidate.get_candidate_by_user_id(user_id)
+        if existing:
+            return jsonify({'error': 'You have already submitted an application'}), 409
+        
+        # Verify position exists
+        position = Position.get_position_by_id(pos_id)
+        if not position:
+            return jsonify({'error': 'Invalid position selected'}), 404
+        
+        # Convert base64 image to bytes
+        try:
+            photo_bytes = base64.b64decode(photo.split(',')[1] if ',' in photo else photo)
+        except Exception as e:
+            return jsonify({'error': 'Invalid image format'}), 400
+        
+        # Create candidate application
+        candidate = Candidate.create_application(user_id, full_name, photo_bytes, pos_id, statement)
+        
+        return jsonify({
+            'message': 'Application submitted successfully',
+            'candidate': {
+                'candidate_id': candidate['candidate_id'],
+                'full_name': candidate['full_name'],
+                'pos_id': candidate['pos_id'],
+                'status': candidate['status']
+            }
+        }), 201
+    
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@api.route('/candidates', methods=['GET'])
+def get_candidates():
+    try:
+        candidates = Candidate.get_all_candidates()
+        newCandidates = []
+        for candidate in candidates:
+            newCandidates.append({
+                'full_name': candidate[0],
+                'position': candidate[1],
+                'status': candidate[2]
+            })
+        print(newCandidates)
+        return jsonify({
+            'message': 'Candidates retrieved successfully',
+            'candidates': newCandidates
         }), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500

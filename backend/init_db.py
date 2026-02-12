@@ -62,6 +62,27 @@ def init_database():
         """)
 
         cursor.execute("""
+            CREATE TABLE IF NOT EXISTS candidates (
+                candidate_id SERIAL PRIMARY KEY,
+                user_id INTEGER NOT NULL UNIQUE,
+                full_name VARCHAR(100) NOT NULL,
+                photo BYTEA,
+                pos_id INTEGER NOT NULL,
+                statement TEXT,
+                status VARCHAR(20) DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected')),
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                
+                FOREIGN KEY (user_id)
+                    REFERENCES users(id)
+                    ON DELETE CASCADE,
+                
+                FOREIGN KEY (pos_id)
+                    REFERENCES positions(pos_id)
+                    ON DELETE CASCADE
+            );
+        """)
+
+        cursor.execute("""
         CREATE TABLE IF NOT EXISTS votes (
             vote_id SERIAL PRIMARY KEY,
             voter_id INTEGER NOT NULL,
