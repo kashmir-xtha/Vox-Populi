@@ -7,26 +7,51 @@ export default function AdminApproveCandidates() {
     const [data, setData] = useState([])
     const navigate = useNavigate()
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const response = await axios.get("http://localhost:5000/api/candidates")
-                if (response.data.candidates) {
-                    console.log(response.data.candidates)
-                    setData(response.data.candidates)
-                }
-            } catch (error) {
-                console.log(error)
+    const fetchData = async () => {
+        try {
+            const response = await axios.get("http://localhost:5000/api/candidates")
+            if (response.data.candidates) {
+                setData(response.data.candidates.filter(
+                    (candidate) => candidate.status === "pending"
+                ))
             }
+        } catch (error) {
+            console.log(error)
         }
+    }
+
+    const handleApproved = async (id) => {
+        const statusData = {
+            id,
+            status: "approved"
+        }
+        try {
+            const response = await axios.post("http://localhost:5000/api/candidates/status", statusData)
+            fetchData()
+        } catch (error) {
+            console.log(error)
+        }
+
+    }
+
+    const handleReject = async (id) => {
+        const statusData = {
+            id,
+            status: "rejected"
+        }
+        const response = await axios.post("http://localhost:5000/api/candidates/status", statusData)
+        fetchData()
+    }
+
+    useEffect(() => {
         fetchData()
         const token = localStorage.getItem("token")
         const role = token ? JSON.parse(atob(token)).role : ""
-        
+
         if (role !== 'admin') {
             navigate('/')
         }
-    },[navigate])
+    }, [navigate])
     return (
         <>
             <div className="flex h-screen overflow-hidden">
@@ -84,36 +109,40 @@ export default function AdminApproveCandidates() {
                         </div>
                         <div className="h-[60vh] overflow-scroll ">
                             {/* Iterate votes log from here using map function */}
-                            <div className="flex items-center justify-between">
-                                <div className="w-1/3 px-6 py-4 whitespace-nowrap text-sm font-medium text-[#111418]">
-                                    <div className="flex items-center gap-3">
-                                        <div className="size-10 rounded-full bg-slate-100 flex items-center justify-center text-[#137fec] font-bold overflow-hidden"
-                                            data-alt="Candidate profile photo">
-                                            <img alt="John Doe" className="w-full h-full object-cover" src={test} />
+                            {data.map((item, index) => {
+                                return (
+                                    <div key={index} className="flex items-center justify-between">
+                                        <div className="w-1/3 px-6 py-4 whitespace-nowrap text-sm font-medium text-[#111418]">
+                                            <div className="flex items-center gap-3">
+                                                <div className="size-10 rounded-full bg-slate-100 flex items-center justify-center text-[#137fec] font-bold overflow-hidden"
+                                                    data-alt="Candidate profile photo">
+                                                    <img alt="John Doe" className="w-full h-full object-cover" src={test} />
+                                                </div>
+                                                <div>
+                                                    <p className="text-[#111418] font-bold">{item.full_name}</p>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <p className="text-[#111418] font-bold">test</p>
+                                        <div className="w-1/3 px-6 py-4 text-[#137fec] text-xs font-bold">
+                                            {item.position}
+                                        </div>
+                                        <div className="w-1/3 px-6 py-4 whitespace-nowrap text-sm font-semibold text-[#137fec]">
+                                            <div className="flex justify-end gap-2">
+                                                <button onClick={() => handleApproved(item.id)}
+                                                    className="cursor-pointer flex items-center gap-1 bg-[#22c55e] hover:bg-[#16a34a] text-white px-4 py-2 rounded-lg text-sm font-bold transition-colors">
+                                                    <span className="material-symbols-outlined text-[18px]">check_circle</span>
+                                                    Approve
+                                                </button>
+                                                <button onClick={() => handleReject(item.id)}
+                                                    className="cursor-pointer flex items-center gap-1 bg-[#ef4444] hover:bg-[#9c0101] text-white px-4 py-2 rounded-lg text-sm font-bold transition-colors">
+                                                    <span className="material-symbols-outlined text-[18px]">cancel</span>
+                                                    Reject
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                                <div className="w-1/3 px-6 py-4 text-[#137fec] text-xs font-bold">
-                                    test
-                                </div>
-                                <div className="w-1/3 px-6 py-4 whitespace-nowrap text-sm font-semibold text-[#137fec]">
-                                    <div className="flex justify-end gap-2">
-                                        <button
-                                            className="cursor-pointer flex items-center gap-1 bg-[#22c55e] hover:bg-[#16a34a] text-white px-4 py-2 rounded-lg text-sm font-bold transition-colors">
-                                            <span className="material-symbols-outlined text-[18px]">check_circle</span>
-                                            Approve
-                                        </button>
-                                        <button
-                                            className="cursor-pointer flex items-center gap-1 bg-[#ef4444] hover:bg-[#9c0101] text-white px-4 py-2 rounded-lg text-sm font-bold transition-colors">
-                                            <span className="material-symbols-outlined text-[18px]">cancel</span>
-                                            Reject
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
+                                )
+                            })}
                         </div>
                     </div>
                 </main>

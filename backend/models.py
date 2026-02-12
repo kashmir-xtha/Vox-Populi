@@ -102,8 +102,16 @@ class Candidate:
     @staticmethod
     def get_all_candidates():
         query = """
-        SELECT c.full_name, p.title, c.status 
+        SELECT c.full_name, p.title, c.status, c.candidate_id 
         FROM candidates c
         JOIN positions p ON c.pos_id = p.pos_id
         """
         return db.execute(query, (), fetchall=True)
+    
+    @staticmethod
+    def update_status(candidate_id, new_status):
+        query = """
+            UPDATE candidates
+            SET status = %s
+            WHERE candidate_id = %s"""
+        return db.execute(query, (new_status, candidate_id))

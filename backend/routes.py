@@ -170,12 +170,26 @@ def get_candidates():
             newCandidates.append({
                 'full_name': candidate[0],
                 'position': candidate[1],
-                'status': candidate[2]
+                'status': candidate[2],
+                'id': candidate[3]
             })
         print(newCandidates)
         return jsonify({
             'message': 'Candidates retrieved successfully',
             'candidates': newCandidates
         }), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@api.route('/candidates/status', methods=['POST'])
+def update_candidate_status():
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({'error': 'Missing data'}), 400
+        print(data)
+        Candidate.update_status(candidate_id=data.get('id'), new_status=data.get('status'))
+        print(data)
+        return jsonify({'message': 'Candidate status updated successfully'}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
