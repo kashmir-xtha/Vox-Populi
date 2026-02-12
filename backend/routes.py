@@ -90,8 +90,9 @@ def get_positions():
 
         newPos = []
         for pos in positions:
-            newPos.append(pos[0])
+            newPos.append(pos)
 
+        print(newPos)
         if positions is None:
             positions = []
         return jsonify({
@@ -107,7 +108,16 @@ def submit_application():
     try:
         data = request.get_json()
         
-        if not data or not data.get('user_id') or not data.get('full_name') or not data.get('pos_id') or not data.get('photo'):
+        if not data:
+            print("Missing data")   
+        if not data.get('user_id'):
+            print("Missing user_id")
+        if not data.get('full_name'):
+            print("Missing full_name")
+        if not data.get('pos_id'):
+            print("Missing pos_id")
+        if not data.get('photo'):
+            print("Missing photo")
             return jsonify({'error': 'Missing required fields'}), 400
         
         user_id = data['user_id']

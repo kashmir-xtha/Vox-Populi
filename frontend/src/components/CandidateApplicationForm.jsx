@@ -135,6 +135,7 @@ export default function CandidateApplicationForm() {
             try {
                 const response = await axios.get("http://localhost:5000/api/positions")
                 if (response.data.positions) {
+                    console.log(response.data.positions)
                     setPositions(response.data.positions)
                 }
             } catch (error) {
@@ -238,8 +239,8 @@ export default function CandidateApplicationForm() {
                                         Select the position you're running for
                                     </option>
                                     {positions.map((position, index) => (
-                                        <option key={index} value={index}>
-                                            {position}
+                                        <option key={position[0]} value={position[0]}>
+                                            {position[1]}
                                         </option>
                                     ))}
                                 </select>

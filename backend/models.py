@@ -71,7 +71,7 @@ class Position:
     
     @staticmethod
     def get_all_positions():
-        query = "SELECT title FROM positions ORDER BY pos_id"
+        query = "SELECT pos_id, title FROM positions ORDER BY pos_id"
         return db.execute(query, (), fetchall=True)
     
     @staticmethod
@@ -106,6 +106,4 @@ class Candidate:
         FROM candidates c
         JOIN positions p ON c.pos_id = p.pos_id
         """
-        test = db.execute(query, (), fetchall=True)
-        print(test)
         return db.execute(query, (), fetchall=True)
