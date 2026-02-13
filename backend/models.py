@@ -82,31 +82,44 @@ class Position:
 
 class Candidate:
     @staticmethod
-    def create_application(user_id, full_name, photo, pos_id, statement):
+    def create_application(user_id, full_name, photo_path, pos_id, statement):
+        """
+        Create a new candidate application
+        
+        Args:
+            user_id: ID of the user applying
+            full_name: Full name of candidate
+            photo_path: File path to the candidate's photo (VARCHAR)
+            pos_id: Position ID they're applying for
+            statement: Candidate statement
+        """
         query = """
         INSERT INTO candidates (user_id, full_name, photo, pos_id, statement, status)
         VALUES (%s, %s, %s, %s, %s, 'pending')
-        RETURNING candidate_id, user_id, full_name, pos_id, statement, status, created_at
+        RETURNING candidate_id, user_id, full_name, photo, pos_id, statement, status, created_at
         """
         
-        return db.execute(query, (user_id, full_name, photo, pos_id, statement), fetchone=True)
+        return db.execute(query, (user_id, full_name, photo_path, pos_id, statement), fetchone=True)
     
     @staticmethod
-    def get_candidate_by_user_id(user_id):
+    def get_candidate_by_id(candidate_id):
+        """Get candidate by ID"""
         query = """
-        SELECT candidate_id, user_id, full_name, pos_id, statement, status, created_at 
-        FROM candidates WHERE user_id = %s
+        SELECT candidate_id, user_id, full_name, photo, pos_id, statement, status, created_at
+        FROM candidates
+        WHERE candidate_id = %s
         """
-        return db.execute(query, (user_id,), fetchone=True)
-
+        return db.execute(query, (candidate_id,), fetchone=True)
+    
     @staticmethod
     def get_all_candidates():
+        """Get all candidates"""
         query = """
-        SELECT c.full_name, p.title, c.status, c.candidate_id 
+        SELECT c.candidate_id, c.user_id, c.full_name, c.photo, c.pos_id, p.title, c.statement, c.status, c.created_at
         FROM candidates c
         JOIN positions p ON c.pos_id = p.pos_id
         """
-        return db.execute(query, (), fetchall=True)
+        return db.execute(query, fetchall=True)
     
     @staticmethod
     def update_status(candidate_id, new_status):

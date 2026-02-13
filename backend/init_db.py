@@ -53,20 +53,20 @@ def init_database():
         
         # Create indexes for better performance
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_users_username ON users(username)")
-        
+        # Create positions table
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS positions (
                 pos_id SERIAL PRIMARY KEY,
                 title VARCHAR(100) UNIQUE NOT NULL
             );
         """)
-
+        # Create candidates table
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS candidates (
                 candidate_id SERIAL PRIMARY KEY,
                 user_id INTEGER NOT NULL UNIQUE,
                 full_name VARCHAR(100) NOT NULL,
-                photo BYTEA,
+                photo VARCHAR(500) NOT NULL,
                 pos_id INTEGER NOT NULL,
                 statement TEXT,
                 status VARCHAR(20) DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected')),

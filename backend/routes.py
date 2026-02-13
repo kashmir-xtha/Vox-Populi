@@ -1,6 +1,21 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, send_from_directory
 from models import User, Position, Candidate
 import base64
+import os
+from werkzeug.utils import secure_filename
+import uuid
+from datetime import datetime
+
+UPLOAD_FOLDER = 'uploads/candidates'
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+MAX_FILE_SIZE = 5 * 1024 * 1024  # 5MB
+
+# Create upload directory if it doesn't exist
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
 
 api = Blueprint('api', __name__)
 
@@ -102,63 +117,89 @@ def get_positions():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+# route to serve images
+@api.route('/uploads/candidates/<filename>')
+def serve_candidate_photo(filename):
+    """Serve candidate photos"""
+    try:
+        upload_dir = os.path.abspath(UPLOAD_FOLDER)
+        return send_from_directory(upload_dir, filename)
+    except FileNotFoundError:
+        return jsonify({'error': 'Image not found'}), 404
 
 @api.route('/candidates', methods=['POST'])
 def submit_application():
     try:
-        data = request.get_json()
+        # Get form data instead of JSON
+        user_id = request.form.get('user_id')
+        full_name = request.form.get('full_name', '').strip()
+        pos_id = request.form.get('pos_id')
+        statement = request.form.get('statement', '').strip()
         
-        if not data:
-            print("Missing data")   
-        if not data.get('user_id'):
-            print("Missing user_id")
-        if not data.get('full_name'):
-            print("Missing full_name")
-        if not data.get('pos_id'):
-            print("Missing pos_id")
-        if not data.get('photo'):
-            print("Missing photo")
+        # Get file from request
+        if 'photo' not in request.files:
+            return jsonify({'error': 'No photo provided'}), 400
+        
+        photo_file = request.files['photo']
+        
+        # Validation
+        if not user_id or not full_name or not pos_id:
             return jsonify({'error': 'Missing required fields'}), 400
         
-        user_id = data['user_id']
-        full_name = data['full_name'].strip()
-        pos_id = data['pos_id']
-        photo = data['photo']  # base64 encoded image
-        statement = data.get('statement', '').strip()
+        if photo_file.filename == '':
+            return jsonify({'error': 'No photo selected'}), 400
+        
+        if not allowed_file(photo_file.filename):
+            return jsonify({'error': 'Invalid file type. Only PNG, JPG, and GIF allowed'}), 400
         
         if not full_name:
             return jsonify({'error': 'Full name cannot be empty'}), 400
         
-        # Check if user already applied
-        existing = Candidate.get_candidate_by_user_id(user_id)
-        if existing:
-            return jsonify({'error': 'You have already submitted an application'}), 409
-        
         # Verify position exists
-        position = Position.get_position_by_id(pos_id)
+        position = Position.get_position_by_id(int(pos_id))
         if not position:
             return jsonify({'error': 'Invalid position selected'}), 404
         
-        # Convert base64 image to bytes
+        # Generate unique filename
+        file_ext = photo_file.filename.rsplit('.', 1)[1].lower()
+        unique_filename = f"{uuid.uuid4().hex}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.{file_ext}"
+        
+        # Save file
+        filepath = os.path.join(UPLOAD_FOLDER, unique_filename)
+        photo_file.save(filepath)
+        
+        # Convert to forward slashes for database storage (cross-platform compatible)
+        filepath_normalized = filepath.replace('\\', '/')
+
         try:
-            photo_bytes = base64.b64decode(photo.split(',')[1] if ',' in photo else photo)
-        except Exception as e:
-            return jsonify({'error': 'Invalid image format'}), 400
-        
-        # Create candidate application
-        candidate = Candidate.create_application(user_id, full_name, photo_bytes, pos_id, statement)
-        
-        return jsonify({
-            'message': 'Application submitted successfully',
-            'candidate': {
-                'candidate_id': candidate['candidate_id'],
-                'full_name': candidate['full_name'],
-                'pos_id': candidate['pos_id'],
-                'status': candidate['status']
-            }
-        }), 201
+            # Create candidate application with file path
+            candidate = Candidate.create_application(
+                int(user_id), 
+                full_name, 
+                filepath_normalized,  # Store with forward slashes
+                int(pos_id), 
+                statement
+            )
+            
+            return jsonify({
+                'message': 'Application submitted successfully',
+                'candidate': {
+                    'candidate_id': candidate['candidate_id'],
+                    'full_name': candidate['full_name'],
+                    'pos_id': candidate['pos_id'],
+                    'status': candidate['status'],
+                    'photo_path': candidate['photo']
+                }
+            }), 201
+            
+        except Exception as db_error:
+            # Clean up file if database insert fails
+            if os.path.exists(filepath):
+                os.remove(filepath)
+            raise db_error
     
     except Exception as e:
+        print(f"Error in submit_application: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
 @api.route('/candidates', methods=['GET'])
@@ -168,12 +209,12 @@ def get_candidates():
         newCandidates = []
         for candidate in candidates:
             newCandidates.append({
-                'full_name': candidate[0],
-                'position': candidate[1],
-                'status': candidate[2],
-                'id': candidate[3]
+                'full_name': candidate[2],
+                'position': candidate[5],
+                'status': candidate[7],
+                'photo_url': f'http://localhost:5000/api/{candidate[3]}',  # ✅ Full URL
+                'id': candidate[0]  # this is candidate_id from candidates table
             })
-        print(newCandidates)
         return jsonify({
             'message': 'Candidates retrieved successfully',
             'candidates': newCandidates
