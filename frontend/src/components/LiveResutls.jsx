@@ -1,6 +1,21 @@
-import test from "../assets/homepage_image.png"
+import { useEffect, useState } from "react"
+import axios from "axios"
 
 export default function LiveResults() {
+    const [data, setData] = useState([])
+    const fetchData = async () => {
+        try {
+            const response = await axios.get("http://localhost:5000/api/results/live")
+            setData(response.data?.results || [])
+        } catch (error) {
+            console.log(error)
+        }
+    }
+    
+    useEffect(() => {
+        fetchData()
+    }, [])
+
     return (
         <>
             <main className="w-full mx-auto p-8">
@@ -16,33 +31,56 @@ export default function LiveResults() {
                         </p>
                     </div>
                 </div>
-                {/* each role section here */}
-                <section className="mb-10">
-                    <div className="flex items-center justify-between border-b border-gray-100 pb-3 mb-4">
-                        <h2 className="text-[#111418] text-xl font-bold">test</h2>
-                    </div>
-                    {/* each candidate in that role here */}
-                    <div className="space-y-4">
-                        <div
-                            className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
-                            <div className="flex justify-between items-center mb-3">
-                                <div className="flex items-center gap-3">
-                                    <img className="size-10 rounded-full" src={test} />
-                                    <div>
-                                        <p className="text-[#111418] font-bold text-base">Sarah Jenkins</p>
+                {data.length === 0 ? (
+                    <div className="text-center text-[#617589] text-sm">No results yet.</div>
+                ) : (
+                    data.map((positionCandidates, index) => (
+                        <section className="mb-10" key={`pos-${index}`}>
+                            <div className="flex items-center justify-between border-b border-gray-100 pb-3 mb-4">
+                                <h2 className="text-[#111418] text-xl font-bold">
+                                    {positionCandidates[0]?.position_title || `Position ${positionCandidates[0]?.pos_id ?? index + 1}`}
+                                </h2>
+                            </div>
+                            <div className="space-y-4">
+                                {positionCandidates.map((candidate) => (
+                                    <div
+                                        className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm"
+                                        key={`${candidate.pos_id}-${candidate.full_name}`}
+                                    >
+                                        <div className="flex justify-between items-center mb-3">
+                                            <div className="flex items-center gap-3">
+                                                <img
+                                                    className="size-10 rounded-full"
+                                                    src={candidate.photo_url}
+                                                    alt={candidate.full_name}
+                                                />
+                                                <div>
+                                                    <p className="text-[#111418] font-bold text-base">
+                                                        {candidate.full_name}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <div className="text-right">
+                                                <p className="text-xl font-bold text-[#137fec] leading-none">
+                                                    {candidate.votes}
+                                                </p>
+                                                <p className="text-xs font-medium text-[#617589] mt-1">
+                                                    {candidate.percentage}%
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div className="w-full bg-gray-100 rounded-full h-2.5 overflow-hidden">
+                                            <div
+                                                className="bg-[#137fec] h-full rounded-full"
+                                                style={{ width: `${candidate.percentage || 0}%` }}
+                                            ></div>
+                                        </div>
                                     </div>
-                                </div>
-                                <div className="text-right">
-                                    <p className="text-xl font-bold text-[#137fec] leading-none">12,450</p>
-                                    <p className="text-xs font-medium text-[#617589] mt-1">54.2%</p>
-                                </div>
+                                ))}
                             </div>
-                            <div className="w-full bg-gray-100 rounded-full h-2.5 overflow-hidden">
-                                <div className="bg-[#137fec] h-full rounded-full w-[54.2%]"></div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
+                        </section>
+                    ))
+                )}
             </main>
         </>
     )

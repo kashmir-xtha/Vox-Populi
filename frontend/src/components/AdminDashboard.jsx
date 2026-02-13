@@ -1,10 +1,45 @@
 import { NavLink, useNavigate } from "react-router-dom"
-import { useEffect } from "react"
+import { useState, useEffect } from "react"
+import axios from "axios"
 
 function AdminDashboard() {
     const navigate = useNavigate()
+    const [positions, setPositions] = useState([])
+    const [pending, setPending] = useState([])
+    const [logs, setLogs] = useState([])
+    const [totalVotes, setTotalVotes] = useState(0)
+
+    const fetchData = async () => {
+        try {
+            const response = await axios.get("http://localhost:5000/api/dashboard/monitoring-log")
+            setLogs(response.data?.logs || [])
+            setTotalVotes(response.data?.total_votes || 0)
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    const fetchPositions = async () => {
+        try {
+            const response = await axios.get("http://localhost:5000/api/positions")
+            if (response.data.positions) {
+                setPositions(response.data.positions)
+            }
+        }
+        catch (error) {
+            console.log(error)
+        }
+    }
+
+    const fetchPending = async () => {
+        const response = await axios.get("http://localhost:5000/api/candidates")
+        setPending((response.data.candidates))
+    }
 
     useEffect(() => {
+        fetchData()
+        fetchPositions()
+        fetchPending()
         const token = localStorage.getItem("token")
         const role = token ? JSON.parse(atob(token)).role : ""
 
@@ -70,7 +105,7 @@ function AdminDashboard() {
                                         Total Voters</p>
                                     <span className="material-symbols-outlined text-[#137fec]">groups</span>
                                 </div>
-                                <p className="text-[#111418] text-3xl font-black leading-tight">0</p>
+                                <p className="text-[#111418] text-3xl font-black leading-tight">{totalVotes}</p>
                             </div>
                             <div
                                 className="flex flex-col gap-2 rounded-xl p-6 bg-white border-[#616161] shadow-sm">
@@ -79,7 +114,7 @@ function AdminDashboard() {
                                         Active Positions</p>
                                     <span className="material-symbols-outlined text-[#137fec]">ballot</span>
                                 </div>
-                                <p className="text-[#111418]  text-3xl font-black leading-tight">0</p>
+                                <p className="text-[#111418]  text-3xl font-black leading-tight">{positions.length}</p>
                             </div>
                             <div
                                 className="flex flex-col gap-2 rounded-xl p-6 bg-white border border-[#dbe0e6] shadow-sm">
@@ -88,7 +123,7 @@ function AdminDashboard() {
                                         Pending Approvals</p>
                                     <span className="material-symbols-outlined text-[#137fec]">pending_actions</span>
                                 </div>
-                                <p className="text-[#111418] text-3xl font-black leading-tight">0</p>
+                                <p className="text-[#111418] text-3xl font-black leading-tight">{pending.filter((item) => item.status === 'pending').length}</p>
                             </div>
                         </div>
                         <div
@@ -116,17 +151,28 @@ function AdminDashboard() {
                                     Timestamp</div>
                             </div>
                             <div className="h-[60vh] overflow-scroll ">
-                                {/* Iterate votes log from here using map function */}
-                                <div className="flex items-center justify-between">
-                                    <div className="w-1/4 px-6 py-4 whitespace-nowrap text-sm font-medium text-[#111418]">
-                                        test</div>
-                                    <div className="w-1/4 px-6 py-4 whitespace-nowrap text-sm text-[#617589]">
-                                        test</div>
-                                    <div className="w-1/4 px-6 py-4 whitespace-nowrap text-sm font-semibold text-[#137fec]">
-                                        test</div>
-                                    <div className="w-1/4 px-6 py-4 whitespace-nowrap text-sm text-[#617589]">
-                                        2026-01-22 14:10:00</div>
-                                </div>
+                                {logs.length === 0 ? (
+                                    <div className="flex items-center justify-center h-full">
+                                        <p className="text-[#617589] text-sm">No votes yet</p>
+                                    </div>
+                                ) : (
+                                    logs.map((log, index) => (
+                                        <div className="flex items-center justify-between border-b border-[#dbe0e6]" key={index}>
+                                            <div className="w-1/4 px-6 py-4 whitespace-nowrap text-sm font-medium text-[#111418]">
+                                                {log.voter_name}
+                                            </div>
+                                            <div className="w-1/4 px-6 py-4 whitespace-nowrap text-sm text-[#617589]">
+                                                {log.position_title}
+                                            </div>
+                                            <div className="w-1/4 px-6 py-4 whitespace-nowrap text-sm font-semibold text-[#137fec]">
+                                                {log.candidate_name}
+                                            </div>
+                                            <div className="w-1/4 px-6 py-4 whitespace-nowrap text-sm text-[#617589]">
+                                                {log.timestamp}
+                                            </div>
+                                        </div>
+                                    ))
+                                )}
                             </div>
                         </div>
                     </div>

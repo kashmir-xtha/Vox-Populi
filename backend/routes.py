@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify, send_from_directory
-from models import User, Position, Candidate
+from models import User, Position, Candidate, Vote
 import base64
 import os
 from werkzeug.utils import secure_filename
@@ -212,7 +212,8 @@ def get_candidates():
                 'full_name': candidate[2],
                 'position': candidate[5],
                 'status': candidate[7],
-                'photo_url': f'http://localhost:5000/api/{candidate[3]}',  # ✅ Full URL
+                'statement': candidate[6],
+                'photo_url': f'http://localhost:5000/api/{candidate[3]}',  
                 'id': candidate[0]  # this is candidate_id from candidates table
             })
         return jsonify({
@@ -232,5 +233,125 @@ def update_candidate_status():
         Candidate.update_status(candidate_id=data.get('id'), new_status=data.get('status'))
         print(data)
         return jsonify({'message': 'Candidate status updated successfully'}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@api.route('/votes', methods=['POST'])
+def cast_vote():
+    """
+    Endpoint to cast a vote.
+    Expects JSON: { "voter_id": int, "candidate_id": int, "pos_id": int }
+    """
+    data = request.get_json()
+
+    # Validate input
+    required_fields = ['voter_id', 'candidate_id', 'pos_id']
+    if not data or not all(field in data for field in required_fields):
+        return jsonify({'error': 'Missing required fields'}), 400
+
+    voter_id = data['voter_id']
+    candidate_id = data['candidate_id']
+    pos_id = data['pos_id']
+
+    # Check if voter already voted for this position
+    existing_vote = Vote.get_vote(voter_id, pos_id)
+    if existing_vote:
+        return jsonify({'error': 'You have already voted for this position'}), 409
+
+    # Cast the vote
+    vote = Vote.cast_vote(voter_id, candidate_id, pos_id)
+    if vote:
+        return jsonify({
+            'message': 'Vote cast successfully',
+            'vote': vote
+        }), 201
+    else:
+        return jsonify({'error': 'Failed to cast vote'}), 500
+
+@api.route('/votes/position/<int:pos_id>', methods=['GET'])
+def get_votes_for_position(pos_id):
+    """
+    Get all votes for a specific position.
+    """
+    votes = Vote.get_votes_by_position(pos_id)
+    return jsonify({'votes': votes}), 200
+
+@api.route('/votes/voter/<int:voter_id>', methods=['GET'])
+def get_votes_by_voter(voter_id):
+    """
+    Get all votes cast by a specific voter.
+    """
+    votes = Vote.get_votes_by_voter(voter_id)
+    return jsonify({'votes': votes}), 200
+
+@api.route('/results/live', methods=['GET'])
+def get_live_results():
+    """
+    Get live election results grouped by position.
+    """
+    try:
+        rows = Vote.get_live_results()
+        positions_map = {}
+
+        for row in rows or []:
+            pos_id = row['pos_id']
+            if pos_id not in positions_map:
+                positions_map[pos_id] = {
+                    'total_votes': 0,
+                    'candidates': []
+                }
+
+            vote_count = int(row['vote_count'] or 0)
+            positions_map[pos_id]['total_votes'] += vote_count
+
+            positions_map[pos_id]['candidates'].append({
+                'pos_id': pos_id,
+                'position_title': row['position_title'],
+                'full_name': row['full_name'],
+                'photo_url': f"{request.host_url}api/{row['photo']}",
+                'votes': vote_count
+            })
+
+        results = []
+        for position in positions_map.values():
+            total_votes = position['total_votes']
+            for candidate in position['candidates']:
+                candidate['total_votes'] = total_votes
+                if total_votes > 0:
+                    candidate['percentage'] = round((candidate['votes'] / total_votes) * 100, 1)
+                else:
+                    candidate['percentage'] = 0.0
+            results.append(position['candidates'])
+        print(results)
+        return jsonify({
+            'message': 'Live results retrieved successfully',
+            'results': results
+        }), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@api.route('/dashboard/monitoring-log', methods=['GET'])
+def get_vote_monitoring_log():
+    """
+    Get vote monitoring log for admin dashboard.
+    Returns voter name, position, candidate, and timestamp for all votes.
+    """
+    try:
+        logs = Vote.get_vote_monitoring_log()
+        formatted_logs = []
+        for log in logs or []:
+            formatted_logs.append({
+                'voter_name': log['voter_name'],
+                'position_title': log['position_title'],
+                'candidate_name': log['candidate_name'],
+                'timestamp': log['timestamp'].strftime('%Y-%m-%d %H:%M:%S') if log['timestamp'] else None
+            })
+        return jsonify({
+            'message': 'Vote monitoring log retrieved successfully',
+            'logs': formatted_logs,
+            'total_votes': len(formatted_logs)
+        }), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
