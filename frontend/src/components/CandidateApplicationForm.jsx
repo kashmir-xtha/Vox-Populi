@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom"
 
 
 export default function CandidateApplicationForm() {
-    const [selectedFile, setSelectedFile] = useState(null)
+    const [selectedFile, setSelectedFile] = useState(null) // is a object-type
     const [preview, setPreview] = useState(null)
     const [positions, setPositions] = useState([])
     const [fullName, setFullName] = useState("")
@@ -37,11 +37,11 @@ export default function CandidateApplicationForm() {
         setSelectedFile(file)
         setMessage("")
 
-        // Create preview
+        // Create preview while uploading
         const reader = new FileReader()
         reader.onloadend = () => {
             setPreview(reader.result)
-        };
+        }
         reader.readAsDataURL(file)
     }
 
@@ -82,48 +82,32 @@ export default function CandidateApplicationForm() {
             setLoading(false)
             return
         }
-
-        // Get user from token
+        
         const token = localStorage.getItem("token")
-        const user = token ? JSON.parse(atob(token)) : null
+        const user = token ? JSON.parse(atob(token)) : ""
 
-        if (!user || user.role !== "candidate") {
-            setMessage("Candidate access required")
-            setLoading(false)
-            return
-        }
-
+        const formData = new FormData()
+        formData.append('user_id', user.id)
+        formData.append('full_name', fullName.trim())
+        formData.append('pos_id', parseInt(positionId))
+        formData.append('photo', selectedFile) // sends actualll file not bs
+        formData.append('statement', statement.trim())
         try {
-            // Read file as base64
-            const reader = new FileReader()
-            reader.onload = async () => {
-                try {
-                    const response = await axios.post(
-                        "http://localhost:5000/api/candidates",
-                        {
-                            user_id: user.id,
-                            full_name: fullName.trim(),
-                            pos_id: parseInt(positionId),
-                            photo: reader.result,
-                            statement: statement.trim()
-                        }
-                    )
+            const response = await axios.post(
+                "http://localhost:5000/api/candidates",
+                formData
+            )
 
-                    if (response.data.error) {
-                        setMessage(response.data.error)
-                    } else {
-                        setMessage("✓ Application submitted successfully!")
-                        setFullName("")
-                        setStatement("")
-                        setPositionId("")
-                        resetUpload()
-                    }
-                } catch (error) {
-                    setMessage(error.response?.data?.error || "Server error")
-                }
+            if (response.data.error) {
+                setMessage(response.data.error)
+            } else {
+                setMessage("✓ Application submitted successfully!")
+                setFullName("")
+                setStatement("")
+                setPositionId("")
+                resetUpload()
                 setLoading(false)
             }
-            reader.readAsDataURL(selectedFile)
         } catch (error) {
             setMessage("Server is offline")
             setLoading(false)

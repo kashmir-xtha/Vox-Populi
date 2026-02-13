@@ -116,7 +116,7 @@ export default function AdminApproveCandidates() {
                                             <div className="flex items-center gap-3">
                                                 <div className="size-10 rounded-full bg-slate-100 flex items-center justify-center text-[#137fec] font-bold overflow-hidden"
                                                     data-alt="Candidate profile photo">
-                                                    <img alt="John Doe" className="w-full h-full object-cover" src={test} />
+                                                    <img alt="John Doe" className="w-full h-full object-cover" src={item.photo_url} />
                                                 </div>
                                                 <div>
                                                     <p className="text-[#111418] font-bold">{item.full_name}</p>
