@@ -15,7 +15,7 @@ export default function AdminResults() {
     }, [navigate])
     return (
         <>
-            <div className="flex h-screen overflow-hidden">
+            <div className="flex">
                 <aside
                     className="w-64 shrink-0 border-r border-[#dbe0e6] bg-white  flex flex-col">
                     <div className="flex flex-col h-full p-4">

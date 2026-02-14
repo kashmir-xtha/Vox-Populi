@@ -7,13 +7,17 @@ function AdminDashboard() {
     const [positions, setPositions] = useState([])
     const [pending, setPending] = useState([])
     const [logs, setLogs] = useState([])
-    const [totalVotes, setTotalVotes] = useState(0)
+    const [totalVoters, setTotalVoters] = useState(0)
 
     const fetchData = async () => {
         try {
             const response = await axios.get("http://localhost:5000/api/dashboard/monitoring-log")
-            setLogs(response.data?.logs || [])
-            setTotalVotes(response.data?.total_votes || 0)
+            const logsData = response.data?.logs || []
+            setLogs(logsData)
+
+            // Count unique voters
+            const uniqueVoters = new Set(logsData.map(log => log.voter_name))
+            setTotalVoters(uniqueVoters.size)
         } catch (error) {
             console.log(error)
         }
@@ -105,7 +109,7 @@ function AdminDashboard() {
                                         Total Voters</p>
                                     <span className="material-symbols-outlined text-[#137fec]">groups</span>
                                 </div>
-                                <p className="text-[#111418] text-3xl font-black leading-tight">{totalVotes}</p>
+                                <p className="text-[#111418] text-3xl font-black leading-tight">{totalVoters}</p>
                             </div>
                             <div
                                 className="flex flex-col gap-2 rounded-xl p-6 bg-white border-[#616161] shadow-sm">
@@ -116,7 +120,8 @@ function AdminDashboard() {
                                 </div>
                                 <p className="text-[#111418]  text-3xl font-black leading-tight">{positions.length}</p>
                             </div>
-                            <div
+                            <NavLink
+                                to='/adminApproveCandidates'
                                 className="flex flex-col gap-2 rounded-xl p-6 bg-white border border-[#dbe0e6] shadow-sm">
                                 <div className="flex justify-between items-start">
                                     <p className="text-[#617589] text-sm font-medium uppercase tracking-wider">
@@ -124,7 +129,7 @@ function AdminDashboard() {
                                     <span className="material-symbols-outlined text-[#137fec]">pending_actions</span>
                                 </div>
                                 <p className="text-[#111418] text-3xl font-black leading-tight">{pending.filter((item) => item.status === 'pending').length}</p>
-                            </div>
+                            </NavLink>
                         </div>
                         <div
                             className="bg-white border border-[#dbe0e6] rounded-xl shadow-sm">

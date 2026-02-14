@@ -50,7 +50,7 @@ export default function LiveResults() {
                                         <div className="flex justify-between items-center mb-3">
                                             <div className="flex items-center gap-3">
                                                 <img
-                                                    className="size-10 rounded-full"
+                                                    className="size-10 rounded-full object-cover"
                                                     src={candidate.photo_url}
                                                     alt={candidate.full_name}
                                                 />
