@@ -1,5 +1,4 @@
 import { NavLink, useNavigate } from "react-router-dom"
-import test from "../assets/homepage_image.png"
 import { useEffect, useState } from "react"
 import axios from "axios"
 

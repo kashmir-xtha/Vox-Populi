@@ -57,10 +57,10 @@ export default function VoterBallot() {
                     // get candidates for this position
                     const filteredCandidates = candidates.filter(
                         item => item.position === position[1]
-                    );
+                    )
 
                     // 🚫 if none exist, render nothing
-                    if (filteredCandidates.length === 0) return null;
+                    if (filteredCandidates.length === 0) return null
 
                     return (
                         <div key={index} className="mb-12">
@@ -89,11 +89,11 @@ export default function VoterBallot() {
                                                 {item.full_name}
                                             </h3>
 
-                                            <p className="text-sm h-32 text-gray-500 line-clamp-6 mb-4 leading-relaxed">
+                                            <p className="text-sm h-36 text-gray-500 mb-4 leading-relaxed">
                                                 {item.statement}
                                             </p>
 
-                                            <button className="cursor-pointer w-full flex items-center justify-center gap-2 rounded-lg h-10 bg-[#137fec] text-white text-sm font-bold">
+                                            <button className="cursor-pointer w-full grid place-content-center rounded-lg h-10 bg-[#137fec] text-white text-sm font-bold hover:bg-green-400 transition-colors">
                                                 Cast Vote
                                             </button>
                                         </div>
@@ -108,13 +108,9 @@ export default function VoterBallot() {
         </main>
         <div
             className="bg-white/90 backdrop-blur-md border-[#f0f2f4] p-4">
-            <div className="max-w-200 mx-auto flex items-center justify-between gap-4">
-                <div className="hidden md:block">
-                    <p className="text-sm font-medium text-[#617589] ">Total Selections: <span
-                        className="text-[#137fec] font-bold">{`0/${positions.length}`}</span></p>
-                </div>
+            <div className="max-w-200 mx-auto flex items-center justify-end gap-4">
                 <button
-                    className="cursor-pointer w-full md:w-auto px-8 h-12 rounded-xl bg-[#137fec] text-white font-bold text-base hover:bg-[#137fec]/90 transition-all shadow-lg shadow-[#137fec]/25 flex items-center justify-center gap-2">
+                    className="cursor-pointer w-full md:w-auto px-8 h-12 rounded-xl bg-[#137fec] text-white font-bold text-base hover:bg-green-500 transition-all shadow-lg shadow-[#137fec]/25 flex items-center justify-center gap-2">
                     <span className="material-symbols-outlined">how_to_vote</span>
                     Confirm Selections
                 </button>
