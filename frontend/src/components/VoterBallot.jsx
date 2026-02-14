@@ -7,6 +7,20 @@ export default function VoterBallot() {
     const [candidates, setCandidates] = useState([])
     const [positions, setPositions] = useState([])
     const [votes, setVotes] = useState([])
+    const token = localStorage.getItem("token")
+    const user = token ? JSON.parse(atob(token)) : ""
+
+    const checkStatus = async () => {
+        try {
+            const response = await axios.get(`http://localhost:5000/api/votes/voter/${user.id}`, {
+            })
+            if (response.data.already_voted) {
+                navigate('/liveResults')
+            }
+        } catch (error) {
+            console.log(error)
+        }
+    }
 
     const fetchPositions = async () => {
         try {
@@ -34,13 +48,10 @@ export default function VoterBallot() {
     }
 
     const handleSubmit = () => {
-        const token = localStorage.getItem("token")
-        const userId = token ? JSON.parse(atob(token)).id : ""
-
         votes.forEach(async vote => {
             try {
                 await axios.post("http://localhost:5000/api/votes", {
-                    voter_id: userId,
+                    voter_id: user.id,
                     candidate_id: vote.candidate,
                     pos_id: vote.position
                 })
@@ -48,16 +59,15 @@ export default function VoterBallot() {
                 console.log(error)
             }
         })
+        checkStatus()
     }
 
     useEffect(() => {
+        checkStatus()
         fetchPositions()
         fetchCandidates()
 
-        const token = localStorage.getItem("token")
-        const role = token ? JSON.parse(atob(token)).role : ""
-
-        if (role !== 'voter') {
+        if (user.role !== 'voter') {
             navigate('/')
         }
     }, [navigate])
@@ -121,8 +131,8 @@ export default function VoterBallot() {
                                                     }}
                                                     disabled={isVoted}
                                                     className={`cursor-pointer w-full grid place-content-center rounded-lg h-10 text-sm font-bold transition-colors ${isVoted
-                                                            ? 'bg-green-500 text-white cursor-not-allowed'
-                                                            : 'bg-[#137fec] text-white hover:bg-green-400'
+                                                        ? 'bg-green-500 text-white cursor-not-allowed'
+                                                        : 'bg-[#137fec] text-white hover:bg-green-400'
                                                         }`}>
                                                     {isVoted ? 'Voted' : 'Cast Vote'}
                                                 </button>
