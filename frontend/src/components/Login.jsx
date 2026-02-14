@@ -16,6 +16,10 @@ function Login() {
             setMessage("Please select a role!!")
             return
         }
+        if(password === "" || username === ""){
+            setMessage("Please fill all the fields!!")
+            return
+        }
         else {
             setMessage("") //clearing the message
             const loginData = {

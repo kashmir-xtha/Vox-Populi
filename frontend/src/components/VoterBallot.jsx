@@ -59,7 +59,9 @@ export default function VoterBallot() {
                 console.log(error)
             }
         })
-        checkStatus()
+        setTimeout(() => {
+            navigate('/liveResults')
+        }, 500)
     }
 
     useEffect(() => {

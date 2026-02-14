@@ -109,7 +109,7 @@ export default function CandidateApplicationForm() {
                 setLoading(false)
             }
         } catch (error) {
-            setMessage("Server is offline")
+            setMessage("Failed to submit application")
             setLoading(false)
         }
     }
