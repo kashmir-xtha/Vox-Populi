@@ -283,7 +283,10 @@ def get_votes_by_voter(voter_id):
     Get all votes cast by a specific voter.
     """
     votes = Vote.get_votes_by_voter(voter_id)
-    return jsonify({'votes': votes}), 200
+    return jsonify({
+        'already_voted': len(votes) > 0,
+        'votes': votes
+        }), 200
 
 @api.route('/results/live', methods=['GET'])
 def get_live_results():
