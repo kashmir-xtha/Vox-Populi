@@ -5,6 +5,17 @@ import axios from "axios"
 export default function AdminCreatePositions() {
     const navigate = useNavigate()
     const [title, setTitle] = useState('')
+    const [positions, setPositions] = useState([])
+
+    const fetchPositions = async () => {
+        try {
+            const response = await axios.get("http://localhost:5000/api/positions")
+            setPositions(response.data.positions)
+        }
+        catch (error) {
+            console.log(error)
+        }
+    }
 
     const handleSubmit = async (e) => {
         e.preventDefault()
@@ -24,6 +35,7 @@ export default function AdminCreatePositions() {
     }
 
     useEffect(() => {
+        fetchPositions()
         const token = localStorage.getItem("token")
         const role = token ? JSON.parse(atob(token)).role : ""
 
@@ -85,7 +97,7 @@ export default function AdminCreatePositions() {
                                         <h4 className="text-lg font-bold text-[#111418] ">Position Details</h4>
                                         <p className="text-sm text-[#617589]">Enter the title and selection rules for this voting category.</p>
                                     </div>
-                                    <div className="space-y-6">
+                                    <div className="space-y-2">
                                         <div className="flex flex-col gap-2">
                                             <label
                                                 className="text-[#111418]  text-sm font-semibold leading-normal">
@@ -94,9 +106,18 @@ export default function AdminCreatePositions() {
                                             <input
                                                 value={title}
                                                 onChange={(e) => setTitle(e.target.value)}
-                                                className="form-input block w-full rounded-lg border-[#dbe0e6]  bg-white text-[#111418] h-12 px-4 text-base focus:border-[#137fec] focus:ring-1 focus:ring-[#137fec] placeholder:text-[#617589]"
+                                                className="form-input block w-full rounded-lg bg-white text-[#111418] h-12 px-4 text-base ring-1 ring-[#137fec] placeholder:text-[#617589]"
                                                 placeholder="e.g. President" required="" type="text" />
-                                            <p className="text-[#617589] text-xs">This title will be displayed as a heading on the voting page.</p>
+                                            <p className="text-[#617589] text-sm">Existing Positions:</p>
+                                            <div className="flex flex-wrap items-center justify-start gap-2">
+                                                {positions.map((position, index) => {
+                                                    return (
+                                                        <span key={index} className="px-3.5 py-1 rounded-4xl bg-gray-500 text-white">
+                                                            {position[1]}
+                                                        </span>
+                                                    )
+                                                })}
+                                            </div>
                                         </div>
                                     </div>
                                     <div
