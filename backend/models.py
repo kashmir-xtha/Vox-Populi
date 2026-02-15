@@ -124,7 +124,7 @@ class Candidate:
         query = """
         SELECT candidate_id, user_id, full_name, photo, pos_id, statement, status, created_at
         FROM candidates
-        WHERE candidate_id = %s
+        WHERE user_id = %s
         """
         return db.execute(query, (candidate_id,), fetchone=True)
     

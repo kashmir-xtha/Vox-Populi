@@ -22,7 +22,6 @@ api = Blueprint('api', __name__)
 @api.route('/signup', methods=['POST'])
 def signup():
     data = request.get_json()
-    print(data)
     if not data or not data.get('role') or not data.get('username') or not data.get('password'):
         return jsonify({'error': 'Missing required fields'}), 200
     
@@ -55,7 +54,6 @@ def signup():
 @api.route('/login', methods=['POST'])
 def login():
     data = request.get_json()
-    print(data)
     if not data or not data.get('role') or not data.get('username') or not data.get('password'):
         return jsonify({'error': 'Missing required fields'}), 400
     
@@ -107,7 +105,6 @@ def get_positions():
         for pos in positions:
             newPos.append(pos)
 
-        print(newPos)
         if positions is None:
             positions = []
         return jsonify({
@@ -229,9 +226,13 @@ def update_candidate_status():
         data = request.get_json()
         if not data:
             return jsonify({'error': 'Missing data'}), 400
-        print(data)
+        if (len(data) == 1):
+            status = Candidate.get_candidate_by_id(candidate_id=data.get('id'))
+            if (status):
+                return jsonify({'already_submitted': True})
+            else:
+                return jsonify({'already_submitted': False})
         Candidate.update_status(candidate_id=data.get('id'), new_status=data.get('status'))
-        print(data)
         return jsonify({'message': 'Candidate status updated successfully'}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -326,7 +327,6 @@ def get_live_results():
                 else:
                     candidate['percentage'] = 0.0
             results.append(position['candidates'])
-        print(results)
         return jsonify({
             'message': 'Live results retrieved successfully',
             'results': results

@@ -14,6 +14,32 @@ export default function CandidateApplicationForm() {
     const [loading, setLoading] = useState(false)
     const fileInputRef = useRef(null)
     const navigate = useNavigate()
+    const token = localStorage.getItem("token")
+    const user = token ? JSON.parse(atob(token)) : ""
+
+    const fetchCandidateStatus = async () => {
+        try {
+            const response = await axios.post("http://localhost:5000/api/candidates/status", {
+                id: user.id
+            })
+            if (response.data.already_submitted) {
+                navigate('/liveResults')
+            }
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    const fetchPositions = async () => {
+        try {
+            const response = await axios.get("http://localhost:5000/api/positions")
+            if (response.data.positions) {
+                setPositions(response.data.positions)
+            }
+        } catch (error) {
+            console.log("Failed to fetch positions")
+        }
+    }
 
     // Handle file selection
     const handleFileChange = (e) => {
@@ -82,9 +108,6 @@ export default function CandidateApplicationForm() {
             setLoading(false)
             return
         }
-        
-        const token = localStorage.getItem("token")
-        const user = token ? JSON.parse(atob(token)) : ""
 
         const formData = new FormData()
         formData.append('user_id', user.id)
@@ -108,30 +131,21 @@ export default function CandidateApplicationForm() {
                 resetUpload()
                 setLoading(false)
             }
+            setTimeout(() => {
+                navigate('/liveResults')
+            }, 500)
         } catch (error) {
             setMessage("Failed to submit application")
             setLoading(false)
         }
+
     }
 
     useEffect(() => {
-        const fetchPositions = async () => {
-            try {
-                const response = await axios.get("http://localhost:5000/api/positions")
-                if (response.data.positions) {
-                    console.log(response.data.positions)
-                    setPositions(response.data.positions)
-                }
-            } catch (error) {
-                console.log("Failed to fetch positions")
-            }
-        }
+        fetchCandidateStatus()
         fetchPositions()
 
-        const token = localStorage.getItem("token")
-        const role = token ? JSON.parse(atob(token)).role : ""
-
-        if (role !== 'candidate') {
+        if (user.role !== 'candidate') {
             navigate('/')
         }
     }, [navigate])
