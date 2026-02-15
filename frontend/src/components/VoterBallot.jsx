@@ -74,8 +74,8 @@ export default function VoterBallot() {
         }
     }, [navigate])
     return (<>
-        <main className="flex-1 w-full max-w-200 mx-auto py-10 px-4 md:px-0">
-            <div className="mb-10 text-center">
+        <main className="flex-1 w-full max-w-200 mx-auto py-5 px-4 md:px-0">
+            <div className="mb-5 text-center">
                 <h1 className="text-3xl font-black leading-tight tracking-[-0.033em] mb-3">Voter Election Ballot</h1>
                 <p className="text-[#617589] text-base max-w-xl mx-auto">Select one candidate for each of the following positions. After making your selections, review your ballot for final submission.</p>
             </div>
@@ -87,7 +87,7 @@ export default function VoterBallot() {
                     if (filteredCandidates.length === 0) return null
 
                     return (
-                        <div key={index} className="mb-12">
+                        <div key={index} className="mb-5">
                             <div className="flex items-center justify-between mb-4 px-2">
                                 <h2 className="text-xl font-bold flex items-center gap-2">
                                     <span className="size-2 bg-[#137fec] rounded-full"></span>
@@ -132,11 +132,13 @@ export default function VoterBallot() {
                                                         })
                                                     }}
                                                     disabled={isVoted}
-                                                    className={`cursor-pointer w-full grid place-content-center rounded-lg h-10 text-sm font-bold transition-colors ${isVoted
+                                                    className={`cursor-pointer w-full grid place-content-center rounded-lg h-10 text-base font-bold transition-colors ${isVoted
                                                         ? 'bg-green-500 text-white cursor-not-allowed'
                                                         : 'bg-[#137fec] text-white hover:bg-green-400'
                                                         }`}>
-                                                    {isVoted ? 'Voted' : 'Cast Vote'}
+                                                    {isVoted ? <div className="flex gap-1 items-center justify-center">
+                                                        <span className="material-symbols-outlined">how_to_vote</span>Voted
+                                                    </div> : 'Cast Vote'}
                                                 </button>
                                             </div>
                                         </div>
@@ -149,11 +151,12 @@ export default function VoterBallot() {
             </section>
         </main>
         <div
-            className="bg-white/90 backdrop-blur-md border-[#f0f2f4] p-4">
-            <div className="max-w-200 mx-auto flex items-center justify-end gap-4">
+            className="bg-white/90 backdrop-blur-md border-[#f0f2f4] pb-4">
+            <div className="max-w-200 mx-auto flex items-center gap-4">
+                <div className="w-xl grid place-content-center text-red-500">Note: Once you click “Confirm Selections”, your vote will be permanently submitted and cannot be changed. <br/>Please review your choices carefully before proceeding.</div>
                 <button
                     onClick={handleSubmit}
-                    className="cursor-pointer w-full md:w-auto px-8 h-12 rounded-xl bg-[#137fec] text-white font-bold text-base hover:bg-green-500 transition-all shadow-lg shadow-[#137fec]/25 flex items-center justify-center gap-2">
+                    className="cursor-pointer w-60 px-8 h-12 rounded-xl bg-[#137fec] text-white font-bold text-base hover:bg-green-500 transition-all shadow-lg shadow-[#137fec]/25 flex items-center justify-center gap-2">
                     <span className="material-symbols-outlined">how_to_vote</span>
                     Confirm Selections
                 </button>
