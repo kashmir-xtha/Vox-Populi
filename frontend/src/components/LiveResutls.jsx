@@ -14,6 +14,8 @@ export default function LiveResults() {
     
     useEffect(() => {
         fetchData()
+        const interval = setInterval(fetchData, 5000)       // ← then every 5 seconds
+        return () => clearInterval(interval) 
     }, [])
 
     return (
