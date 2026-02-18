@@ -9,7 +9,7 @@ BASE_DIR = Path(__file__).resolve().parent
 env_paths = [
     BASE_DIR / '.env',           # Same directory as config.py
     BASE_DIR / '.env.local',     # Local override
-    '.env',                      # Current working directory
+    Path('.env'),                      # Current working directory
 ]
 
 # Try each path until we find one that works
