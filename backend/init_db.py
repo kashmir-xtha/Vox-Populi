@@ -1,6 +1,5 @@
 import psycopg2
 from config import config
-import bcrypt
 
 def init_database():
     conn = None

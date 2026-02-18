@@ -9,7 +9,10 @@ def create_app():
     app.config['SECRET_KEY'] = config.SECRET_KEY
     
     # Enable CORS for all routes
-    CORS(app, resources={r"/api/*": {"origins": "http://localhost:5173"}})
+    CORS(app, resources={r"/api/*": {"origins": [
+        "http://localhost:5173",
+        "https://vox-populi-eta.vercel.app"
+    ]}})
     
     # Register blueprints
     app.register_blueprint(api, url_prefix='/api')

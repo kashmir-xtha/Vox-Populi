@@ -1,8 +1,6 @@
 from flask import Blueprint, request, jsonify, send_from_directory
 from models import User, Position, Candidate, Vote
-import base64
 import os
-from werkzeug.utils import secure_filename
 import uuid
 from datetime import datetime
 
