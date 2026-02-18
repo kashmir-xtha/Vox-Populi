@@ -3,6 +3,7 @@ import { useState, useEffect } from "react"
 import axios from "axios"
 
 export default function VoterBallot() {
+    const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000"
     const navigate = useNavigate()
     const [candidates, setCandidates] = useState([])
     const [positions, setPositions] = useState([])
@@ -12,7 +13,7 @@ export default function VoterBallot() {
 
     const checkStatus = async () => {
         try {
-            const response = await axios.get(`http://localhost:5000/api/votes/voter/${user.id}`, {
+            const response = await axios.get(`${API_BASE_URL}/api/votes/voter/${user.id}`, {
             })
             if (response.data.already_voted) {
                 navigate('/liveResults')
@@ -24,7 +25,7 @@ export default function VoterBallot() {
 
     const fetchPositions = async () => {
         try {
-            const response = await axios.get("http://localhost:5000/api/positions")
+            const response = await axios.get(`${API_BASE_URL}/api/positions`)
             if (response.data.positions) {
                 setPositions(response.data.positions)
             }
@@ -36,7 +37,7 @@ export default function VoterBallot() {
 
     const fetchCandidates = async () => {
         try {
-            const response = await axios.get("http://localhost:5000/api/candidates")
+            const response = await axios.get(`${API_BASE_URL}/api/candidates`)
             if (response.data.candidates) {
                 setCandidates(response.data.candidates.filter(
                     (candidate) => candidate.status === "approved"
@@ -50,7 +51,7 @@ export default function VoterBallot() {
     const handleSubmit = () => {
         votes.forEach(async vote => {
             try {
-                await axios.post("http://localhost:5000/api/votes", {
+                await axios.post(`${API_BASE_URL}/api/votes`, {
                     voter_id: user.id,
                     candidate_id: vote.candidate,
                     pos_id: vote.position
@@ -153,7 +154,7 @@ export default function VoterBallot() {
         <div
             className="bg-white/90 backdrop-blur-md border-[#f0f2f4] pb-4">
             <div className="max-w-200 mx-auto flex items-center gap-4">
-                <div className="w-xl grid place-content-center text-red-500">Note: Once you click “Confirm Selections”, your vote will be permanently submitted and cannot be changed. <br/>Please review your choices carefully before proceeding.</div>
+                <div className="w-xl grid place-content-center text-red-500">Note: Once you click “Confirm Selections”, your vote will be permanently submitted and cannot be changed. <br />Please review your choices carefully before proceeding.</div>
                 <button
                     onClick={handleSubmit}
                     className="cursor-pointer w-60 px-8 h-12 rounded-xl bg-[#137fec] text-white font-bold text-base hover:bg-green-500 transition-all shadow-lg shadow-[#137fec]/25 flex items-center justify-center gap-2">

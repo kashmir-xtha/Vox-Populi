@@ -3,13 +3,14 @@ import { useEffect, useState } from "react"
 import axios from "axios"
 
 export default function AdminCreatePositions() {
+    const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000"
     const navigate = useNavigate()
     const [title, setTitle] = useState('')
     const [positions, setPositions] = useState([])
 
     const fetchPositions = async () => {
         try {
-            const response = await axios.get("http://localhost:5000/api/positions")
+            const response = await axios.get(`${API_BASE_URL}/api/positions`)
             setPositions(response.data.positions)
         }
         catch (error) {
@@ -24,7 +25,7 @@ export default function AdminCreatePositions() {
         }
         try {
             const response = await axios.post(
-                "http://localhost:5000/api/positions",
+                `${API_BASE_URL}/api/positions`,
                 position
             )
             console.log(response)

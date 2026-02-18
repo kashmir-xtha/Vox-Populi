@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom"
 
 
 export default function CandidateApplicationForm() {
+    const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000"
     const [selectedFile, setSelectedFile] = useState(null) // is a object-type
     const [preview, setPreview] = useState(null)
     const [positions, setPositions] = useState([])
@@ -19,7 +20,7 @@ export default function CandidateApplicationForm() {
 
     const fetchCandidateStatus = async () => {
         try {
-            const response = await axios.post("http://localhost:5000/api/candidates/status", {
+            const response = await axios.post(`${API_BASE_URL}/api/candidates/status`, {
                 id: user.id
             })
             if (response.data.already_submitted) {
@@ -32,7 +33,7 @@ export default function CandidateApplicationForm() {
 
     const fetchPositions = async () => {
         try {
-            const response = await axios.get("http://localhost:5000/api/positions")
+            const response = await axios.get(`${API_BASE_URL}/api/positions`)
             if (response.data.positions) {
                 setPositions(response.data.positions)
             }
@@ -117,7 +118,7 @@ export default function CandidateApplicationForm() {
         formData.append('statement', statement.trim())
         try {
             const response = await axios.post(
-                "http://localhost:5000/api/candidates",
+                `${API_BASE_URL}/api/candidates`,
                 formData
             )
 

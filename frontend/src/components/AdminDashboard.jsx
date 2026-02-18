@@ -3,6 +3,7 @@ import { useState, useEffect } from "react"
 import axios from "axios"
 
 function AdminDashboard() {
+    const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000"
     const navigate = useNavigate()
     const [positions, setPositions] = useState([])
     const [pending, setPending] = useState([])
@@ -11,7 +12,7 @@ function AdminDashboard() {
 
     const fetchData = async () => {
         try {
-            const response = await axios.get("http://localhost:5000/api/dashboard/monitoring-log")
+            const response = await axios.get(`${API_BASE_URL}/api/dashboard/monitoring-log`)
             const logsData = response.data?.logs || []
             setLogs(logsData)
 
@@ -25,7 +26,7 @@ function AdminDashboard() {
 
     const fetchPositions = async () => {
         try {
-            const response = await axios.get("http://localhost:5000/api/positions")
+            const response = await axios.get(`${API_BASE_URL}/api/positions`)
             if (response.data.positions) {
                 setPositions(response.data.positions)
             }
@@ -36,7 +37,7 @@ function AdminDashboard() {
     }
 
     const fetchPending = async () => {
-        const response = await axios.get("http://localhost:5000/api/candidates")
+        const response = await axios.get(`${API_BASE_URL}/api/candidates`)
         setPending((response.data.candidates))
     }
 

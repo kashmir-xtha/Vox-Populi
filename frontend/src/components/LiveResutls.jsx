@@ -2,20 +2,22 @@ import { useEffect, useState } from "react"
 import axios from "axios"
 
 export default function LiveResults() {
+    const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000"
     const [data, setData] = useState([])
     const fetchData = async () => {
         try {
-            const response = await axios.get("http://localhost:5000/api/results/live")
+            const response = await axios.get(`${API_BASE_URL}/api/results/live`)
             setData(response.data?.results || [])
+            console.log(response.data)
         } catch (error) {
             console.log(error)
         }
     }
-    
+
     useEffect(() => {
         fetchData()
         const interval = setInterval(fetchData, 5000)       // ← then every 5 seconds
-        return () => clearInterval(interval) 
+        return () => clearInterval(interval)
     }, [])
 
     return (

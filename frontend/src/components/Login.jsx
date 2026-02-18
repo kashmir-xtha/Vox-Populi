@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom"
 import axios from 'axios'
 
 function Login() {
+    const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000"
     const [showPassword, setShowPassword] = useState(false)
     const [message, setMessage] = useState("")
     const [role, setRole] = useState("")
@@ -16,7 +17,7 @@ function Login() {
             setMessage("Please select a role!!")
             return
         }
-        if(password === "" || username === ""){
+        if (password === "" || username === "") {
             setMessage("Please fill all the fields!!")
             return
         }
@@ -29,7 +30,7 @@ function Login() {
             }
             try {
                 const response = await axios.post(
-                    "http://localhost:5000/api/login",
+                    `${API_BASE_URL}/api/login`,
                     loginData
                 )
                 setMessage(response.data.error)
@@ -43,10 +44,10 @@ function Login() {
                     if (user.role === 'admin') {
                         navigate('/adminDashboard')
                     }
-                    if (user.role === 'candidate'){
+                    if (user.role === 'candidate') {
                         navigate('/candidateApplicationForm')
                     }
-                    if (user.role === 'voter'){
+                    if (user.role === 'voter') {
                         navigate('/voterBallot')
                     }
                 }

@@ -3,12 +3,13 @@ import { useEffect, useState } from "react"
 import axios from "axios"
 
 export default function AdminApproveCandidates() {
+    const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000"
     const [data, setData] = useState([])
     const navigate = useNavigate()
 
     const fetchData = async () => {
         try {
-            const response = await axios.get("http://localhost:5000/api/candidates")
+            const response = await axios.get(`${API_BASE_URL}/api/candidates`)
             if (response.data.candidates) {
                 setData(response.data.candidates.filter(
                     (candidate) => candidate.status === "pending"
@@ -25,7 +26,7 @@ export default function AdminApproveCandidates() {
             status: "approved"
         }
         try {
-            const response = await axios.post("http://localhost:5000/api/candidates/status", statusData)
+            const response = await axios.post(`${API_BASE_URL}/api/candidates/status`, statusData)
             fetchData()
         } catch (error) {
             console.log(error)
@@ -38,7 +39,7 @@ export default function AdminApproveCandidates() {
             id,
             status: "rejected"
         }
-        const response = await axios.post("http://localhost:5000/api/candidates/status", statusData)
+        const response = await axios.post(`${API_BASE_URL}/api/candidates/status`, statusData)
         fetchData()
     }
 

@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom"
 import axios from "axios"
 
 function Signup() {
+    const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000"
     const [showPassword, setShowPassword] = useState(false)
     const [role, setRole] = useState("admin")
     const [username, setUsername] = useState("")
@@ -20,14 +21,14 @@ function Signup() {
         try {
             setMessage("")
             const response = await axios.post(
-                "http://localhost:5000/api/signup",
+                `${API_BASE_URL}/api/signup`,
                 loginData
             )
             setMessage(response.data.error)
-            if (response.data.error){
+            if (response.data.error) {
                 return
             }
-            else{
+            else {
                 navigate('/login')
             }
         } catch (error) {
