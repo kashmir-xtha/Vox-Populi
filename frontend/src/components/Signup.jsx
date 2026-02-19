@@ -1,18 +1,20 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import axios from "axios"
 
 function Signup() {
     const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000"
     const [showPassword, setShowPassword] = useState(false)
-    const [role, setRole] = useState("admin")
+    const [role, setRole] = useState("candidate")
     const [username, setUsername] = useState("")
     const [password, setPassword] = useState("")
     const [message, setMessage] = useState("")
+    const [loading, setLoading] = useState(false)
     const navigate = useNavigate()
 
     const handleSubmit = async (e) => {
         e.preventDefault()
+        setLoading(true)
         const loginData = {
             role,
             username,
@@ -26,6 +28,7 @@ function Signup() {
             )
             setMessage(response.data.error)
             if (response.data.error) {
+                setLoading(false)
                 return
             }
             else {
@@ -33,8 +36,24 @@ function Signup() {
             }
         } catch (error) {
             setMessage("Server is offline")
+            setLoading(false)
         }
     }
+
+    useEffect(() => {
+        const token = localStorage.getItem("token")
+        const role = token ? JSON.parse(atob(token)).role : ""
+
+        if (role === 'admin') {
+            navigate('/adminDashboard')
+        }
+        if (role === 'candidate') {
+            navigate('/candidateApplicationForm')
+        }
+        if (role === 'voter') {
+            navigate('/voterBallot')
+        }
+    }, [navigate])
 
     return (
         <div className="relative flex min-h-screen flex-col items-center justify-center p-6">
@@ -57,7 +76,6 @@ function Signup() {
                                 <select
                                     value={role} onChange={(e) => setRole(e.target.value)}
                                     className="w-full h-12 px-4 rounded-xl border border-gray-200 bg-gray-50 focus:ring-2 focus:ring-[#137fec] focus:border-transparent transition-all outline-none appearance-none">
-                                    <option value="admin">Administrator</option>
                                     <option value="candidate">Candidate</option>
                                     <option value="voter">Voter</option>
                                 </select>
@@ -95,9 +113,10 @@ function Signup() {
                         </div>
                         <div className="h-6 text-center -mt-2 mb-2 text-red-500">{message}</div>
                         <button
-                            className="w-full h-12 bg-[#137fec] text-white font-bold rounded-xl hover:bg-[#137fec]/90 transition-all shadow-lg shadow-[#137fec]/25 flex items-center justify-center gap-2"
+                            disabled={loading}
+                            className="cursor-pointer w-full flex items-center justify-center gap-2 rounded-lg bg-[#137fec] text-white h-12 text-base font-bold hover:bg-blue-600 transition-colors shadow-lg shadow-[#137fec]/20 disabled:opacity-50 disabled:cursor-not-allowed"
                             type="submit">
-                            Sign Up
+                            {loading ? "Signing up..." : "Sign Up"}
                         </button>
                     </form>
                     <div className="pt-6 border-t border-gray-100 text-center">

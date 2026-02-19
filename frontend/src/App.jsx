@@ -4,6 +4,7 @@ import Home from "./components/Home"
 import Footer from "./components/Footer"
 import Login from "./components/Login"
 import Signup from "./components/Signup"
+import AdminPortal from "./components/AdminPortal"
 import AdminDashboard from "./components/AdminDashboard"
 import AdminCreatePositions from "./components/AdminCreatePositions"
 import AdminApproveCandidates from "./components/AdminApproveCandidates"
@@ -21,6 +22,7 @@ function App() {
         <Routes>
           <Route path="/" Component={Home} />
           <Route path="/login" Component={Login} />
+          <Route path="/adminPortal" Component={AdminPortal} />
           <Route path="/signup" Component={Signup} />
           <Route path="/adminDashboard" Component={AdminDashboard} />
           <Route path="/adminCreatePositions" Component={AdminCreatePositions} />

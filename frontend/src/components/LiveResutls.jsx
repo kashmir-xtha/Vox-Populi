@@ -8,7 +8,6 @@ export default function LiveResults() {
         try {
             const response = await axios.get(`${API_BASE_URL}/api/results/live`)
             setData(response.data?.results || [])
-            console.log(response.data)
         } catch (error) {
             console.log(error)
         }

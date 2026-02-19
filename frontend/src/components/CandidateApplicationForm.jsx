@@ -136,7 +136,7 @@ export default function CandidateApplicationForm() {
                 navigate('/liveResults')
             }, 500)
         } catch (error) {
-            setMessage("Failed to submit application")
+            setMessage(error.response.data.error)
             setLoading(false)
         }
 
@@ -257,8 +257,7 @@ export default function CandidateApplicationForm() {
                                 onChange={(e) => setStatement(e.target.value)}
                                 className="form-textarea flex w-full rounded-lg text-[#111418] focus:ring-2 focus:ring-[#137fec]/20 border border-[#dbe0e6] bg-white focus:border-[#137fec] min-h-30 placeholder:text-[#617589] p-4 text-base font-normal leading-relaxed resize-none transition-all"
                                 maxLength="200" placeholder="Briefly state your vision and key objectives..." required></textarea>
-                            <p className="text-xs text-gray-500">This statement will be visible to all voters
-                                on the ballot paper.</p>
+                            <p className="text-xs text-gray-500">This statement will be visible to all voters on the ballot paper.</p>
                         </div>
                         {message && (
                             <div className={`text-sm px-4 py-3 rounded ${message.includes('✓') || message.includes('successfully') ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>

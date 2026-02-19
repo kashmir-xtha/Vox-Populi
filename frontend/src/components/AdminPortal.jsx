@@ -2,12 +2,12 @@ import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import axios from 'axios'
 
-function Login() {
+function AdminPortal() {
     const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000"
     const [showPassword, setShowPassword] = useState(false)
     const [message, setMessage] = useState("")
     const [loading, setLoading] = useState(false)
-    const [role, setRole] = useState("")
+    const role = "admin"
     const [username, setUsername] = useState("")
     const [password, setPassword] = useState("")
     const navigate = useNavigate()
@@ -15,11 +15,6 @@ function Login() {
     const handleSubmit = async (e) => {
         e.preventDefault()
         setLoading(true)
-        if (role === "") {
-            setMessage("Please select a role!!")
-            setLoading(false)
-            return
-        }
         if (password === "" || username === "") {
             setMessage("Please fill all the fields!!")
             setLoading(false)
@@ -45,16 +40,7 @@ function Login() {
                 else {
                     const token = btoa(JSON.stringify(response.data.user))
                     localStorage.setItem("token", token)
-                    const user = JSON.parse(atob(token))
-                    if (user.role === 'admin') {
-                        navigate('/adminDashboard')
-                    }
-                    if (user.role === 'candidate') {
-                        navigate('/candidateApplicationForm')
-                    }
-                    if (user.role === 'voter') {
-                        navigate('/voterBallot')
-                    }
+                    navigate('/adminDashboard')
                 }
             } catch (error) {
                 setMessage("Server is offline")
@@ -77,7 +63,7 @@ function Login() {
             navigate('/voterBallot')
         }
     }, [navigate])
-    
+
     return (
         <>
             <main className="flex-1 flex flex-col items-center justify-center px-4 py-12">
@@ -86,40 +72,8 @@ function Login() {
                     <div className="mb-8">
                         <h1
                             className="text-[#111418]  tracking-tight text-[32px] font-bold leading-tight text-center">
-                            Election Portal Login</h1>
-                        <p className="text-gray-500  text-center mt-2">Welcome back. Please select your
-                            role and sign in.</p>
-                    </div>
-                    <div className="mb-6">
-                        <p className="text-[#111418]  text-sm font-medium leading-normal pb-2 px-1">I am a...
-                        </p>
-                        <div
-                            className="flex h-11 w-full items-center justify-center rounded-lg bg-gray-100  p-1">
-                            <label
-                                className="flex cursor-pointer h-full grow items-center justify-center overflow-hidden rounded-lg px-2 has-checked:bg-white has-checked:shadow-md has-checked:text-[#137fec] text-gray-500  text-sm font-semibold leading-normal transition-all">
-                                <span className="truncate">Candidate</span>
-                                <input
-                                    className="invisible w-0"
-                                    name="role-selection"
-                                    type="radio"
-                                    value="Candidate"
-                                    checked={role === "Candidate"}
-                                    onChange={(e) => setRole(e.target.value)}
-                                />
-                            </label>
-                            <label
-                                className="flex cursor-pointer h-full grow items-center justify-center overflow-hidden rounded-lg px-2 has-checked:bg-white has-checked:shadow-md has-checked:text-[#137fec] text-gray-500  text-sm font-semibold leading-normal transition-all">
-                                <span className="truncate">Voter</span>
-                                <input
-                                    className="invisible w-0"
-                                    name="role-selection"
-                                    type="radio"
-                                    value="Voter"
-                                    checked={role === "Voter"}
-                                    onChange={(e) => setRole(e.target.value)}
-                                />
-                            </label>
-                        </div>
+                            Admin Portal Login</h1>
+                        <p className="text-gray-500  text-center mt-2">Welcome back. Please sign in to access Admin Panel</p>
                     </div>
                     <form className="space-y-5" onSubmit={handleSubmit}>
                         <div className="flex flex-col w-full">
@@ -179,4 +133,4 @@ function Login() {
     )
 }
 
-export default Login
+export default AdminPortal
