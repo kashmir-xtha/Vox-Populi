@@ -191,7 +191,7 @@ def get_candidates():
                 'position': candidate[5],
                 'status': candidate[7],
                 'statement': candidate[6],
-                'photo_url': f'http://localhost:5000/api/{candidate[3]}',  
+                'photo_url': candidate[3],  
                 'id': candidate[0]  # this is candidate_id from candidates table
             })
         return jsonify({
@@ -294,7 +294,7 @@ def get_live_results():
                 'pos_id': pos_id,
                 'position_title': row['position_title'],
                 'full_name': row['full_name'],
-                'photo_url': f"{request.host_url}api/{row['photo']}",
+                'photo_url': row['photo'],
                 'votes': vote_count
             })
 

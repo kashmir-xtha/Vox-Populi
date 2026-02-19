@@ -98,7 +98,7 @@ export default function VoterBallot() {
                                     Choose 1
                                 </span>
                             </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mb-7">
                                 {filteredCandidates.map((candidate, candidateIndex) => {
                                     // Check if this candidate is voted for this position
                                     const isVoted = votes.some(
@@ -146,6 +146,7 @@ export default function VoterBallot() {
                                     );
                                 })}
                             </div>
+                            <hr />
                         </div>
                     )
                 })}
@@ -154,7 +155,7 @@ export default function VoterBallot() {
         <div
             className="bg-white/90 backdrop-blur-md border-[#f0f2f4] pb-4">
             <div className="max-w-200 mx-auto flex items-center gap-4">
-                <div className="w-xl grid place-content-center text-red-500">Note: Once you click “Confirm Selections”, your vote will be permanently submitted and cannot be changed. <br />Please review your choices carefully before proceeding.</div>
+                <div className="w-xl flex italic text-red-500">Your vote is locked once submitted <br />Please review carefully before confirming !!</div>
                 <button
                     onClick={handleSubmit}
                     className="cursor-pointer w-60 px-8 h-12 rounded-xl bg-[#137fec] text-white font-bold text-base hover:bg-green-500 transition-all shadow-lg shadow-[#137fec]/25 flex items-center justify-center gap-2">
