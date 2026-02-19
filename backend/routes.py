@@ -3,13 +3,14 @@ from models import User, Position, Candidate, Vote
 import os
 import uuid
 from datetime import datetime
+import cloudinary.uploader
 
-UPLOAD_FOLDER = 'uploads/candidates'
+# # Uncomment this, if want to host images locally
+# UPLOAD_FOLDER = 'uploads/candidates'
+# MAX_FILE_SIZE = 5 * 1024 * 1024  # 5MB
+# os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
-MAX_FILE_SIZE = 5 * 1024 * 1024  # 5MB
-
-# Create upload directory if it doesn't exist
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -93,7 +94,6 @@ def create_position():
         'position': position
     }), 201
 
-
 @api.route('/positions', methods=['GET'])
 def get_positions():
     try:
@@ -112,15 +112,15 @@ def get_positions():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-# route to serve images
-@api.route('/uploads/candidates/<filename>')
-def serve_candidate_photo(filename):
-    """Serve candidate photos"""
-    try:
-        upload_dir = os.path.abspath(UPLOAD_FOLDER)
-        return send_from_directory(upload_dir, filename)
-    except FileNotFoundError:
-        return jsonify({'error': 'Image not found'}), 404
+# # Uncomment this, to host images locally and serve images to localhost backend
+# @api.route('/uploads/candidates/<filename>')
+# def serve_candidate_photo(filename):
+#     """Serve candidate photos"""
+#     try:
+#         upload_dir = os.path.abspath(UPLOAD_FOLDER)
+#         return send_from_directory(upload_dir, filename)
+#     except FileNotFoundError:
+#         return jsonify({'error': 'Image not found'}), 404
 
 @api.route('/candidates', methods=['POST'])
 def submit_application():
@@ -136,63 +136,46 @@ def submit_application():
             return jsonify({'error': 'No photo provided'}), 400
         
         photo_file = request.files['photo']
-        
-        # Validation
-        if not user_id or not full_name or not pos_id:
-            return jsonify({'error': 'Missing required fields'}), 400
-        
-        if photo_file.filename == '':
-            return jsonify({'error': 'No photo selected'}), 400
-        
-        if not allowed_file(photo_file.filename):
-            return jsonify({'error': 'Invalid file type. Only PNG, JPG, and GIF allowed'}), 400
-        
-        if not full_name:
-            return jsonify({'error': 'Full name cannot be empty'}), 400
-        
-        # Verify position exists
-        position = Position.get_position_by_id(int(pos_id))
-        if not position:
-            return jsonify({'error': 'Invalid position selected'}), 404
-        
-        # Generate unique filename
-        file_ext = photo_file.filename.rsplit('.', 1)[1].lower()
-        unique_filename = f"{uuid.uuid4().hex}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.{file_ext}"
-        
-        # Save file
-        filepath = os.path.join(UPLOAD_FOLDER, unique_filename)
-        photo_file.save(filepath)
-        
-        # Convert to forward slashes for database storage (cross-platform compatible)
-        filepath_normalized = filepath.replace('\\', '/')
 
-        try:
-            # Create candidate application with file path
-            candidate = Candidate.create_application(
-                int(user_id), 
-                full_name, 
-                filepath_normalized,  # Store with forward slashes
-                int(pos_id), 
-                statement
-            )
+        # # Uncomment this, to host image file locally
+        # # Generate unique filename
+        # file_ext = photo_file.filename.rsplit('.', 1)[1].lower()
+        # unique_filename = f"{uuid.uuid4().hex}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.{file_ext}"
+        # # Save file
+        # filepath = os.path.join(UPLOAD_FOLDER, unique_filename)
+        # photo_file.save(filepath)
+        # # Convert to forward slashes for database storage (cross-platform compatible)
+        # filepath_normalized = filepath.replace('\\', '/')
+
+        # Upload directly to Cloudinary (no local saving needed)
+        upload_result = cloudinary.uploader.upload(
+            photo_file,
+            folder="candidates",          # organizes files in Cloudinary dashboard
+            allowed_formats=["png", "jpg", "jpeg", "gif"],
+            max_bytes=5 * 1024 * 1024     # 5MB limit
+        )
+        # This is the permanent public URL — store this in your DB
+        photo_url = upload_result['secure_url']
+        candidate = Candidate.create_application(
+            int(user_id),
+            full_name,
+            # filepath_normalized,  # Store with forward slashes for locally hosting images
+            photo_url,   # store the URL instead of a file path
+            int(pos_id),
+            statement
+        )
+
+        return jsonify({
+            'message': 'Application submitted successfully',
+            'candidate': {
+                'candidate_id': candidate['candidate_id'],
+                'full_name': candidate['full_name'],
+                'pos_id': candidate['pos_id'],
+                'status': candidate['status'],
+                'photo_path': candidate['photo']
+            }
+        }), 201
             
-            return jsonify({
-                'message': 'Application submitted successfully',
-                'candidate': {
-                    'candidate_id': candidate['candidate_id'],
-                    'full_name': candidate['full_name'],
-                    'pos_id': candidate['pos_id'],
-                    'status': candidate['status'],
-                    'photo_path': candidate['photo']
-                }
-            }), 201
-            
-        except Exception as db_error:
-            # Clean up file if database insert fails
-            if os.path.exists(filepath):
-                os.remove(filepath)
-            raise db_error
-    
     except Exception as e:
         print(f"Error in submit_application: {str(e)}")
         return jsonify({'error': str(e)}), 500

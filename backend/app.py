@@ -3,11 +3,20 @@ from flask_cors import CORS
 from config import config
 from routes import api
 import logging
+import cloudinary
+import os
 
 def create_app():
     app = Flask(__name__, static_folder=None)
     app.config['SECRET_KEY'] = config.SECRET_KEY
     
+    # Configure Cloudinary
+    cloudinary.config(
+        cloud_name=os.environ.get('CLOUDINARY_CLOUD_NAME'),
+        api_key=os.environ.get('CLOUDINARY_API_KEY'),
+        api_secret=os.environ.get('CLOUDINARY_API_SECRET')
+    )
+
     # Enable CORS for all routes
     CORS(app, resources={r"/api/*": {"origins": [
         "http://localhost:5173",
