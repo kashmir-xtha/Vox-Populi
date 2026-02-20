@@ -32,7 +32,15 @@ function Signup() {
                 return
             }
             else {
-                navigate('/login')
+                const token = btoa(JSON.stringify(response.data.user))
+                localStorage.setItem("token", token)
+                const user = JSON.parse(atob(token))
+                if (user.role === 'candidate') {
+                    navigate('/candidateApplicationForm')
+                }
+                if (user.role === 'voter') {
+                    navigate('/voterBallot')
+                }
             }
         } catch (error) {
             setMessage("Server is offline")

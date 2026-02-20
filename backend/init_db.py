@@ -94,7 +94,7 @@ def init_database():
                 ON DELETE CASCADE,
 
             FOREIGN KEY (candidate_id)
-                REFERENCES users(id)
+                REFERENCES candidates(candidate_id)
                 ON DELETE CASCADE,
 
             FOREIGN KEY (pos_id)
