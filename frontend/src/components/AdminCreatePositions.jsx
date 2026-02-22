@@ -33,6 +33,7 @@ export default function AdminCreatePositions() {
             console.log(error)
         }
         setTitle("")
+        fetchPositions()
     }
 
     useEffect(() => {

@@ -5,10 +5,10 @@ import uuid
 from datetime import datetime
 import cloudinary.uploader
 
-# # Uncomment this, if want to host images locally
-# UPLOAD_FOLDER = 'uploads/candidates'
-# MAX_FILE_SIZE = 5 * 1024 * 1024  # 5MB
-# os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+# Uncomment this, if want to host images locally
+UPLOAD_FOLDER = 'uploads/candidates'
+MAX_FILE_SIZE = 5 * 1024 * 1024  # 5MB
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
@@ -112,15 +112,15 @@ def get_positions():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-# # Uncomment this, to host images locally and serve images to localhost backend
-# @api.route('/uploads/candidates/<filename>')
-# def serve_candidate_photo(filename):
-#     """Serve candidate photos"""
-#     try:
-#         upload_dir = os.path.abspath(UPLOAD_FOLDER)
-#         return send_from_directory(upload_dir, filename)
-#     except FileNotFoundError:
-#         return jsonify({'error': 'Image not found'}), 404
+# Uncomment this, to host images locally and serve images to localhost backend
+@api.route('/uploads/candidates/<filename>')
+def serve_candidate_photo(filename):
+    """Serve candidate photos"""
+    try:
+        upload_dir = os.path.abspath(UPLOAD_FOLDER)
+        return send_from_directory(upload_dir, filename)
+    except FileNotFoundError:
+        return jsonify({'error': 'Image not found'}), 404
 
 @api.route('/candidates', methods=['POST'])
 def submit_application():
@@ -137,15 +137,16 @@ def submit_application():
         
         photo_file = request.files['photo']
 
-        # # Uncomment this, to host image file locally
-        # # Generate unique filename
-        # file_ext = photo_file.filename.rsplit('.', 1)[1].lower()
-        # unique_filename = f"{uuid.uuid4().hex}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.{file_ext}"
-        # # Save file
-        # filepath = os.path.join(UPLOAD_FOLDER, unique_filename)
-        # photo_file.save(filepath)
-        # # Convert to forward slashes for database storage (cross-platform compatible)
-        # filepath_normalized = filepath.replace('\\', '/')
+        # Uncomment this, to host image file locally
+        # Generate unique filename
+        file_ext = photo_file.filename.rsplit('.', 1)[1].lower()
+        unique_filename = f"{uuid.uuid4().hex}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.{file_ext}"
+        # Save file
+        filepath = os.path.join(UPLOAD_FOLDER, unique_filename)
+        photo_file.save(filepath)
+        # Convert to forward slashes for database storage (cross-platform compatible)
+        filepath_normalized = filepath.replace('\\', '/')
+        filepath_normalized = "http://localhost:5000/api/" + filepath_normalized
 
         # Upload directly to Cloudinary (no local saving needed)
         upload_result = cloudinary.uploader.upload(
